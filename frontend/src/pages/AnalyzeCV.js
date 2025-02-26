@@ -223,22 +223,27 @@ const AnalyzeCV = () => {
     setLoading(true);
     const token = localStorage.getItem("token");
 
-    // Formatear las respuestas como un objeto estructurado
-    const formattedAnswers = answers.map((answer, index) => ({
-      question: questions[index],
-      answer: answer.trim()
-    }));
+    // Remover la última pregunta (la de razonamiento) y su respuesta
+    const questionsWithoutReasoning = questions.slice(0, -1);
+    const answersWithoutReasoning = answers.slice(0, -1);
+
+    // Asegurarse de que las respuestas sean strings válidos
+    const cleanAnswers = answersWithoutReasoning.map(answer => 
+      typeof answer === 'string' ? answer.trim() : ''
+    );
+
+    // Log para depuración
+    console.log("Sending answers:", cleanAnswers);
 
     try {
       const response = await axios.post(
         `${process.env.REACT_APP_API_BASE_URL}/api/users/submit-interview`,
         {
-          interviewResponses: formattedAnswers,
-          completed: true
+          answers: cleanAnswers
         },
         {
           headers: {
-            Authorization: `Bearer ${token}`, // Asegurarse de incluir 'Bearer'
+            Authorization: token,
             "Content-Type": "application/json",
           },
         }
@@ -247,12 +252,20 @@ const AnalyzeCV = () => {
       if (response.status === 200) {
         setSubmitted(true);
         window.speechSynthesis.cancel();
-        setTimeout(() => navigate("/interview-results"), 2000);
+        
+        // Agregar un pequeño retraso antes de la navegación
+        setTimeout(() => {
+          setLoading(false);
+          navigate("/interview-results");
+        }, 2000);
       }
     } catch (error) {
-      console.error("Error details:", error.response?.data);
-      alert(error.response?.data?.message || "Error submitting answers. Please try again.");
-    } finally {
+      console.error("Error submitting interview:", error);
+      console.error("Error response:", error.response?.data);
+      
+      const errorMessage = error.response?.data?.message || 
+                          "Error submitting answers. Please try again.";
+      alert(errorMessage);
       setLoading(false);
     }
   };

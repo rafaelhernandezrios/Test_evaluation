@@ -230,14 +230,14 @@ Please respond only in English using the following format:
 /**
  * Calculate score based on answers evaluation
  */
-export async function calculateScoreBasedOnAnswers(questions, answers, subject) {
+export async function calculateScoreBasedOnAnswers(questions, answers) {
   try {
     if (!questions || !answers || questions.length !== answers.length) {
       throw new Error("Number of questions and answers don't match.");
     }
 
     const prompt = `
-As a professor of "${subject}", evaluate the following student answers.
+As a professor, evaluate the following student answers.
 Consider:
 - For technical questions: accuracy, correct use of concepts and depth of knowledge
 - For process questions: reflection, understanding and analytical capacity
@@ -249,14 +249,8 @@ For each answer, provide:
 Questions and answers:
 ${questions.map((q, i) => `Question: ${q}\nAnswer: ${answers[i]}\n`).join("\n")}
 
-Respond in the following JSON format:
-[
-  { 
-    "score": 85, 
-    "feedback": "Good understanding of the concept. Suggestion: explore further..." 
-  },
-  ...
-]
+Respond with a JSON array where each element has 'score' and 'feedback' properties. Example:
+[{"score":85,"feedback":"Good understanding of concepts..."},{"score":90,"feedback":"Excellent analysis..."}]
 `;
 
     const response = await openai.chat.completions.create({
@@ -266,13 +260,26 @@ Respond in the following JSON format:
       temperature: 0.7,
     });
 
-    const evaluation = JSON.parse(response.choices[0].message.content);
-    const total_score = evaluation.reduce((acc, item) => acc + item.score, 0) / evaluation.length;
+    // Limpiar la respuesta de cualquier formato markdown
+    let cleanResponse = response.choices[0].message.content
+      .replace(/```json\n?/g, '')
+      .replace(/```\n?/g, '')
+      .trim();
 
-    return {
-      total_score: Math.round(total_score),
-      evaluations: evaluation,
-    };
+    // Intentar parsear el JSON
+    try {
+      const evaluation = JSON.parse(cleanResponse);
+      const total_score = evaluation.reduce((acc, item) => acc + item.score, 0) / evaluation.length;
+
+      return {
+        total_score: Math.round(total_score),
+        evaluations: evaluation,
+      };
+    } catch (parseError) {
+      console.error("Error parsing GPT response:", parseError);
+      console.error("Raw response:", cleanResponse);
+      throw new Error("Invalid response format from GPT");
+    }
 
   } catch (error) {
     console.error("Error evaluating answers:", error);

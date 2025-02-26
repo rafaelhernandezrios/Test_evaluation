@@ -23,12 +23,24 @@ const InterviewResults = () => {
           return;
         }
 
-        const response = await axios.get(`${process.env.REACT_APP_API_BASE_URL}/api/users/interview-responses`, {
-          headers: { Authorization: token },
-        });
+        console.log("Fetching interview results...");
+        const response = await axios.get(
+          `${process.env.REACT_APP_API_BASE_URL}/api/users/interview-responses`,
+          {
+            headers: { Authorization: token },
+          }
+        );
+
+        console.log("Interview data received:", response.data);
+        
+        if (!response.data || !response.data.analysis) {
+          throw new Error("No analysis data received");
+        }
+
         setInterviewData(response.data);
       } catch (err) {
-        setError("No se encontraron respuestas de entrevista.");
+        console.error("Error fetching interview data:", err);
+        setError(err.response?.data?.message || "Error loading interview results.");
       } finally {
         setLoading(false);
       }
@@ -111,7 +123,7 @@ const InterviewResults = () => {
       return (
         <div className="error-container">
           <i className="bi bi-exclamation-circle"></i>
-          <p>No interview responses found.</p>
+          <p>{error}</p>
         </div>
       );
     }
