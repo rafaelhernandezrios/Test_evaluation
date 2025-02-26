@@ -194,6 +194,11 @@ const AnalyzeCV = () => {
       setTimeLeft(180); // Reset timer
       speakQuestion(questions[nextIndex]);
     } else if (!isAudioPlaying) {
+      // Asegurarse de que todas las respuestas estén completas antes de enviar
+      if (answers.some(answer => !answer.trim())) {
+        alert("Please answer all questions before submitting");
+        return;
+      }
       handleSubmit();
     }
   };
@@ -215,6 +220,7 @@ const AnalyzeCV = () => {
   };
 
   const handleSubmit = async () => {
+    setLoading(true); // Mostrar loading mientras se envían las respuestas
     const token = localStorage.getItem("token");
 
     try {
@@ -231,10 +237,15 @@ const AnalyzeCV = () => {
 
       if (response.status === 200) {
         setSubmitted(true);
-        setTimeout(() => navigate("/interview-results"), 2000); 
+        // Stop any playing audio before navigation
+        window.speechSynthesis.cancel();
+        setTimeout(() => navigate("/interview-results"), 2000);
       }
     } catch (error) {
       console.error("Error submitting answers:", error);
+      alert("There was an error submitting your answers. Please try again.");
+    } finally {
+      setLoading(false);
     }
   };
 
