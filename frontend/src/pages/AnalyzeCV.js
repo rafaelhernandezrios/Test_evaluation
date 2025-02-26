@@ -220,16 +220,25 @@ const AnalyzeCV = () => {
   };
 
   const handleSubmit = async () => {
-    setLoading(true); // Mostrar loading mientras se envían las respuestas
+    setLoading(true);
     const token = localStorage.getItem("token");
+
+    // Formatear las respuestas como un objeto estructurado
+    const formattedAnswers = answers.map((answer, index) => ({
+      question: questions[index],
+      answer: answer.trim()
+    }));
 
     try {
       const response = await axios.post(
         `${process.env.REACT_APP_API_BASE_URL}/api/users/submit-interview`,
-        { answers },
+        {
+          interviewResponses: formattedAnswers,
+          completed: true
+        },
         {
           headers: {
-            Authorization: token,
+            Authorization: `Bearer ${token}`, // Asegurarse de incluir 'Bearer'
             "Content-Type": "application/json",
           },
         }
@@ -237,13 +246,12 @@ const AnalyzeCV = () => {
 
       if (response.status === 200) {
         setSubmitted(true);
-        // Stop any playing audio before navigation
         window.speechSynthesis.cancel();
         setTimeout(() => navigate("/interview-results"), 2000);
       }
     } catch (error) {
-      console.error("Error submitting answers:", error);
-      alert("There was an error submitting your answers. Please try again.");
+      console.error("Error details:", error.response?.data);
+      alert(error.response?.data?.message || "Error submitting answers. Please try again.");
     } finally {
       setLoading(false);
     }
