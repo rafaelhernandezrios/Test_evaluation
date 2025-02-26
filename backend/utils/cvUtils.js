@@ -1,6 +1,5 @@
 import fs from "fs/promises";
-global.module = { parent: true };  // Simula que el código NO es un script de prueba
-import pdf from "pdf-parse";
+import pdfParse from "pdf-parse/lib/pdf-parse.js";
 import OpenAI from "openai";
 import dotenv from "dotenv";
 import axios from 'axios';
@@ -23,7 +22,7 @@ export async function extractTextFromPdf(pdfUrl) {
     const pdfBuffer = Buffer.from(response.data);
     
     // Parse PDF with pdf-parse
-    const data = await pdf(pdfBuffer);
+    const data = await pdfParse(pdfBuffer);
     return data.text.trim();
   } catch (error) {
     console.error('Error extracting text from PDF:', error);
