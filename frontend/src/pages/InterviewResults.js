@@ -5,6 +5,7 @@ import "bootstrap/dist/css/bootstrap.min.css";
 import "../styles/InterviewResults.css";
 import logo from "../assets/logo1.png";
 import 'bootstrap-icons/font/bootstrap-icons.css';
+import jsPDF from 'jspdf';
 
 const InterviewResults = () => {
   const [interviewData, setInterviewData] = useState(null);
@@ -44,44 +45,54 @@ const InterviewResults = () => {
   const handleDownload = () => {
     if (!interviewData) return;
 
-    // Crear el contenido del PDF
-    const content = `
-      RESULTADOS DE LA ENTREVISTA
-      ==========================
-
-      PUNTAJE TOTAL: ${interviewData.score}/100
-      ----------------------------------------
-
-      ANÁLISIS DETALLADO
-      -----------------
-      ${interviewData.analysis.map((item, index) => `
-      Criterio ${index + 1}
-      Puntaje: ${item.score}
-      ${item.explanation}
-      `).join('\n')}
-
-      PREGUNTAS Y RESPUESTAS
-      ---------------------
-      ${interviewData.questions.map((question, index) => `
-      Pregunta ${index + 1}: ${question}
-      Respuesta: ${interviewData.responses[index]}
-      `).join('\n')}
-    `;
-
-    // Crear un blob con el contenido
-    const blob = new Blob([content], { type: 'text/plain' });
-    const url = window.URL.createObjectURL(blob);
+    // Create new PDF document
+    const doc = new jsPDF();
+    let yPos = 20;
     
-    // Crear un enlace temporal y hacer clic en él
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `Resultados_Entrevista_${new Date().toLocaleDateString()}.txt`;
-    document.body.appendChild(a);
-    a.click();
-    
-    // Limpiar
-    window.URL.revokeObjectURL(url);
-    document.body.removeChild(a);
+    // Add title
+    doc.setFontSize(16);
+    doc.text('RESULTADOS DE LA ENTREVISTA', 20, yPos);
+    yPos += 15;
+
+    // Add total score
+    doc.setFontSize(14);
+    doc.text(`PUNTAJE TOTAL: ${interviewData.score}/100`, 20, yPos);
+    yPos += 20;
+
+    // Add analysis section
+    doc.setFontSize(14);
+    doc.text('ANÁLISIS DETALLADO', 20, yPos);
+    yPos += 10;
+
+    // Add each analysis item
+    interviewData.analysis.forEach((item, index) => {
+      // Check if we need a new page
+      if (yPos > 250) {
+        doc.addPage();
+        yPos = 20;
+      }
+
+      doc.setFontSize(12);
+      doc.text(`Criterio ${index + 1}`, 20, yPos);
+      yPos += 7;
+      doc.text(`Puntaje: ${item.score}`, 20, yPos);
+      yPos += 7;
+
+      // Split long feedback text into multiple lines
+      const splitFeedback = doc.splitTextToSize(item.feedback, 170);
+      splitFeedback.forEach(line => {
+        if (yPos > 250) {
+          doc.addPage();
+          yPos = 20;
+        }
+        doc.text(line, 20, yPos);
+        yPos += 7;
+      });
+      yPos += 10;
+    });
+
+    // Save the PDF
+    doc.save(`Resultados_Entrevista_${new Date().toLocaleDateString()}.pdf`);
   };
 
   const renderContent = () => {
@@ -89,9 +100,9 @@ const InterviewResults = () => {
       return (
         <div className="loading-container">
           <div className="spinner-border text-primary" role="status">
-            <span className="visually-hidden">Cargando...</span>
+            <span className="visually-hidden">Loading...</span>
           </div>
-          <p>Cargando resultados...</p>
+          <p>Loading results...</p>
         </div>
       );
     }
@@ -100,7 +111,7 @@ const InterviewResults = () => {
       return (
         <div className="error-container">
           <i className="bi bi-exclamation-circle"></i>
-          <p>{error}</p>
+          <p>No interview responses found.</p>
         </div>
       );
     }
@@ -113,17 +124,17 @@ const InterviewResults = () => {
           <div className="results-section">
             <h3>
               <i className="bi bi-chat-dots"></i>
-              Preguntas y Respuestas
+              Questions and Answers
             </h3>
             <div className="qa-list">
               {interviewData.questions.map((question, index) => (
                 <div key={index} className="qa-card">
                   <div className="question">
-                    <span className="q-number">P{index + 1}</span>
+                    <span className="q-number">Q{index + 1}</span>
                     <p>{question}</p>
                   </div>
                   <div className="answer">
-                    <h5>Tu Respuesta:</h5>
+                    <h5>Your Answer:</h5>
                     <p>{interviewData.responses[index]}</p>
                   </div>
                 </div>
@@ -136,20 +147,18 @@ const InterviewResults = () => {
           <div className="results-section">
             <h3>
               <i className="bi bi-graph-up"></i>
-              Análisis Detallado
+              Detailed Analysis
             </h3>
             <div className="analysis-grid">
               {interviewData.analysis.map((item, index) => (
                 <div key={index} className="analysis-card">
                   <div className="analysis-header">
-                    <div className="score-badge" style={{ 
-                      backgroundColor: `hsl(${item.score * 1.2}, 70%, 50%)`
-                    }}>
+                    <div className="score-badge">
                       {item.score}
                     </div>
-                    <h4>Criterio {index + 1}</h4>
+                    <h4>Criterion {index + 1}</h4>
                   </div>
-                  <p>{item.explanation}</p>
+                  <p>{item.feedback}</p>
                 </div>
               ))}
             </div>
@@ -165,9 +174,9 @@ const InterviewResults = () => {
       {/* Navbar */}
       <nav className="navbar navbar-expand-lg navbar-dark bg-gray py-3 fixed-top">
         <div className="container-fluid">
-          <img src={logo} alt="Logo Habilities" width="150" height="150" />
+          <img src={logo} alt="MIRAI Logo" width="150" height="150" />
           <Link className="navbar-brand h1 text_format" to="/dashboard" style={{ color: "#fff" }}>
-            Plataforma Inteligente MIRAI para la Detección de Talento
+            MIRAI Intelligent Platform for Academic Evaluation
           </Link>
           
           <button
@@ -183,17 +192,17 @@ const InterviewResults = () => {
             <ul className="navbar-nav ms-auto">
               <li className="nav-item">
                 <Link className="nav-link" to="/profile">
-                  <i className="bi bi-person-circle"></i> Perfil
+                  <i className="bi bi-person-circle"></i> Profile
                 </Link>
               </li>
               <li className="nav-item">
                 <Link className="nav-link" to="/resources">
-                  <i className="bi bi-book"></i> Recursos
+                  <i className="bi bi-book"></i> Resources
                 </Link>
               </li>
               <li className="nav-item">
                 <button onClick={handleLogout} className="nav-link btn btn-link">
-                  <i className="bi bi-box-arrow-right"></i> Cerrar Sesión
+                  <i className="bi bi-box-arrow-right"></i> Logout
                 </button>
               </li>
             </ul>
@@ -207,7 +216,7 @@ const InterviewResults = () => {
         <div className="dashboard-sidebar">
           <div className="sidebar-header">
             <img src={logo} alt="Logo" className="sidebar-logo" />
-            <h3>Resultados</h3>
+            <h3>Results</h3>
           </div>
           
           <div className="sidebar-menu">
@@ -216,30 +225,29 @@ const InterviewResults = () => {
               onClick={() => setActiveSection('overview')}
             >
               <i className="bi bi-speedometer2"></i>
-              Resumen
+              Overview
             </button>
             <button 
               className={`menu-item ${activeSection === 'questions' ? 'active' : ''}`}
               onClick={() => setActiveSection('questions')}
             >
               <i className="bi bi-chat-dots"></i>
-              Preguntas
+              Questions
             </button>
             <button 
               className={`menu-item ${activeSection === 'analysis' ? 'active' : ''}`}
               onClick={() => setActiveSection('analysis')}
             >
               <i className="bi bi-graph-up"></i>
-              Análisis
+              Analysis
             </button>
 
-            {/* Botón de regreso al dashboard */}
             <button 
               className="menu-item return-dashboard"
               onClick={() => navigate('/dashboard')}
             >
               <i className="bi bi-arrow-left-circle"></i>
-              Volver al Dashboard
+              Back to Dashboard
             </button>
           </div>
         </div>

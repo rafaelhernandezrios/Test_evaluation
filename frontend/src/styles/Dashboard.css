@@ -135,6 +135,15 @@
   text-align: center;
 }
 
+/* Estilo específico para el botón de resultados */
+.menu-item.interview-results {
+  background-color: rgba(13, 83, 91, 0.2);
+}
+
+.menu-item.interview-results:hover {
+  background-color: #0d535b;
+}
+
 .sidebar-menu {
   flex: 1;
   margin-bottom: 1rem;
@@ -821,4 +830,29 @@
   .detail-item i {
     margin: 0 auto;
   }
+}
+
+/* Agregar estos estilos al final del archivo */
+
+.cv-actions {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.btn-danger {
+  background-color: #dc3545;
+  color: white;
+  border: none;
+  padding: 0.375rem 0.75rem;
+  transition: background-color 0.3s ease;
+}
+
+.btn-danger:hover {
+  background-color: #bb2d3b;
+}
+
+.d-flex.gap-2 {
+  display: flex;
+  gap: 0.5rem !important;
 }

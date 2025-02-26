@@ -13,281 +13,260 @@ const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
  */
 export async function extractTextFromPdf(pdfUrl) {
   try {
-    // Descargar el archivo desde S3
+    // Download file from S3
     const response = await axios.get(pdfUrl, {
       responseType: 'arraybuffer'
     });
     
-    // Convertir el archivo descargado a buffer
+    // Convert downloaded file to buffer
     const pdfBuffer = Buffer.from(response.data);
     
-    // Analizar PDF con pdf-parse
+    // Parse PDF with pdf-parse
     const data = await pdf(pdfBuffer);
     return data.text.trim();
   } catch (error) {
-    console.error('Error al extraer texto del PDF:', error);
+    console.error('Error extracting text from PDF:', error);
     throw error;
   }
 }
+
 export const evaluateMultipleIntelligences = (responses) => {
-    const intelligences = {
-      "Inteligencia Comunicativa": [9, 10, 17, 22, 30],
-      "Inteligencia Matemática": [5, 7, 15, 20, 25],
-      "Inteligencia Visual": [1, 11, 14, 23, 27],
-      "Inteligencia Motriz": [8, 16, 19, 21, 29],
-      "Inteligencia Rítmica": [3, 4, 13, 24, 28],
-      "Inteligencia de Autoconocimiento": [2, 6, 26, 31, 33],
-      "Inteligencia Social": [12, 18, 32, 34, 35],
-    };
-  
-    const scoreLevels = {
-      "Nivel bajo": [2, 2],   // 2 respuestas verdaderas
-      "Nivel medio": [3, 3],  // 3 respuestas verdaderas
-      "Nivel alto": [4, 5],   // 4 o más respuestas verdaderas
-    };
-  
-    let results = {};
-    let totalScore = 0;
-  
-    for (const [intelligence, questionNumbers] of Object.entries(intelligences)) {
-      let countTrue = questionNumbers.filter((qNum) => responses[qNum] === "5").length;
-      totalScore += countTrue * 5;
-  
-      // Asignar nivel según cantidad de respuestas "Verdadero"
-      let level = "Nivel bajo";
-      for (const [levelName, range] of Object.entries(scoreLevels)) {
-        if (countTrue >= range[0] && countTrue <= range[1]) {
-          level = levelName;
-          break;
-        }
-      }
-  
-      results[intelligence] = { score: countTrue * 5, level };
-    }
-  
-    return { totalScore, results };
+  const intelligences = {
+    "Communication Intelligence": [9, 10, 17, 22, 30],
+    "Mathematical Intelligence": [5, 7, 15, 20, 25],
+    "Visual Intelligence": [1, 11, 14, 23, 27],
+    "Kinesthetic Intelligence": [8, 16, 19, 21, 29],
+    "Musical Intelligence": [3, 4, 13, 24, 28],
+    "Self-Knowledge Intelligence": [2, 6, 26, 31, 33],
+    "Social Intelligence": [12, 18, 32, 34, 35],
   };
-  
-  export const evaluateSoftSkills = (responses) => {
-    const competencies = {
-        "Pensamiento Analítico": [1, 21, 41, 61, 81, 101, 121, 141],
-        "Respuesta ante los problemas": [2, 22, 42, 62, 82, 102, 122, 142],
-        "Iniciativa": [3, 23, 43, 63, 83, 103, 123, 143],
-        "Autodominio": [4, 24, 44, 64, 84, 104, 124, 144],
-        "Afrontamiento al estrés": [5, 25, 45, 65, 85, 105, 125, 145],
-        "Socialización": [6, 26, 46, 66, 86, 106, 126, 146],
-        "Contribución": [7, 27, 47, 67, 87, 107, 127, 147],
-        "Habilidad verbal": [8, 28, 48, 68, 88, 108, 128, 148],
-        "Principios morales": [9, 29, 49, 69, 89, 109, 129, 149],
-        "Compromiso": [10, 30, 50, 70, 90, 110, 130, 150],
-    };
 
-    const scoreLevels = {
-        "Nivel muy bajo": [8, 19],
-        "Nivel bajo": [20, 25],
-        "Nivel medio": [26, 30],
-        "Nivel alto": [31, 35],
-        "Nivel muy alto": [36, 40],
-    };
+  const scoreLevels = {
+    "Low level": [2, 2],    // 2 true answers
+    "Medium level": [3, 3], // 3 true answers
+    "High level": [4, 5],   // 4 or more true answers
+  };
 
-    let results = {};
-    let totalScore = 0;
+  let results = {};
+  let totalScore = 0;
 
-    for (const [competency, questionNumbers] of Object.entries(competencies)) {
-        let sum = questionNumbers.reduce((acc, qNum) => acc + (responses[qNum] || 1), 0); // Asumimos 1 si no hay respuesta
-        totalScore += sum;
+  for (const [intelligence, questionNumbers] of Object.entries(intelligences)) {
+    let countTrue = questionNumbers.filter((qNum) => responses[qNum] === "5").length;
+    totalScore += countTrue * 5;
 
-        let level = "Nivel muy bajo";
-        for (const [levelName, range] of Object.entries(scoreLevels)) {
-            if (sum >= range[0] && sum <= range[1]) {
-                level = levelName;
-                break;
-            }
-        }
-
-        results[competency] = { score: sum, level };
+    let level = "Low level";
+    for (const [levelName, range] of Object.entries(scoreLevels)) {
+      if (countTrue >= range[0] && countTrue <= range[1]) {
+        level = levelName;
+        break;
+      }
     }
 
-    return { totalScore, results };
+    results[intelligence] = { score: countTrue * 5, level };
+  }
+
+  return { totalScore, results };
 };
-  
+
+export const evaluateSoftSkills = (responses) => {
+  const competencies = {
+    "Analytical Thinking": [1, 21, 41, 61, 81, 101, 121, 141],
+    "Problem Response": [2, 22, 42, 62, 82, 102, 122, 142],
+    "Initiative": [3, 23, 43, 63, 83, 103, 123, 143],
+    "Self-Control": [4, 24, 44, 64, 84, 104, 124, 144],
+    "Stress Management": [5, 25, 45, 65, 85, 105, 125, 145],
+    "Socialization": [6, 26, 46, 66, 86, 106, 126, 146],
+    "Contribution": [7, 27, 47, 67, 87, 107, 127, 147],
+    "Verbal Skills": [8, 28, 48, 68, 88, 108, 128, 148],
+    "Moral Principles": [9, 29, 49, 69, 89, 109, 129, 149],
+    "Commitment": [10, 30, 50, 70, 90, 110, 130, 150],
+  };
+
+  const scoreLevels = {
+    "Very low level": [8, 19],
+    "Low level": [20, 25],
+    "Medium level": [26, 30],
+    "High level": [31, 35],
+    "Very high level": [36, 40],
+  };
+
+  let results = {};
+  let totalScore = 0;
+
+  for (const [competency, questionNumbers] of Object.entries(competencies)) {
+    let sum = questionNumbers.reduce((acc, qNum) => acc + (responses[qNum] || 1), 0);
+    totalScore += sum;
+
+    let level = "Very low level";
+    for (const [levelName, range] of Object.entries(scoreLevels)) {
+      if (sum >= range[0] && sum <= range[1]) {
+        level = levelName;
+        break;
+      }
+    }
+
+    results[competency] = { score: sum, level };
+  }
+
+  return { totalScore, results };
+};
+
 /**
- * Analyze CV text using OpenAI GPT, extracting hard/soft skills and experience.
+ * Analyze report text using OpenAI GPT
  */
 export async function analyzeCvText(text) {
-    try {
-      console.log("Enviando texto del CV a OpenAI...");
-  
-      // Reemplaza "gpt-4o-mini" con un modelo más estable si es necesario
-      const response = await openai.chat.completions.create({
-        model: "gpt-4o-mini", // Alternativa: "gpt-3.5-turbo"
-        messages: [
-          { role: "system", content: "Eres un experto en análisis de currículums." },
-          { role: "user", content: `Extrae las habilidades duras y blandas así como la experiencia más relevantes del siguiente CV:\n\n${text}` },
-        ],
-        max_tokens: 500,
-        temperature: 0.7,
-      });
-  
-      // Verificar si la respuesta es válida
-      if (!response || !response.choices || !response.choices[0].message) {
-        throw new Error("Respuesta inesperada de OpenAI");
-      }
-  
-      const extractedText = response.choices[0].message.content.trim();
-  
-      console.log("Resultado de OpenAI:", extractedText);
-  
-      return extractedText;
-    } catch (error) {
-      console.error("Error en analyzeCvText:", error);
-      return "Error en el análisis del CV.";
+  try {
+    console.log("Sending Report to AI...");
+
+    const response = await openai.chat.completions.create({
+      model: "gpt-4o-mini",
+      messages: [
+        { 
+          role: "system", 
+          content: "You are an expert in analyzing academic reports." 
+        },
+        { 
+          role: "user", 
+          content: `Analyze the following report and identify key concepts, methodology and main conclusions:\n\n${text}` 
+        },
+      ],
+      max_tokens: 500,
+      temperature: 0.7,
+    });
+
+    if (!response?.choices?.[0]?.message) {
+      throw new Error("Unexpected response from OpenAI");
     }
+
+    const extractedText = response.choices[0].message.content.trim();
+    console.log("OpenAI Result:", extractedText);
+    return extractedText;
+
+  } catch (error) {
+    console.error("Error in analyzeCvText:", error);
+    return "Error analyzing the report.";
   }
-  
+}
 
 /**
- * Generate 3 hard-skill questions and 2 soft-skill questions.
- * Hard-coded skill classification, or adapt as you see fit.
+ * Analyze assignment report using OpenAI GPT
  */
-export async function generateQuestions(skills) {
-  const hardSkillCandidates = ["Python", "Machine Learning", "Data Analysis"];
-  const softSkillCandidates = ["Teamwork", "Communication"];
+export async function analyzeAssignmentReport(text, subject, topic) {
+  try {
+    console.log("Analyzing assignment report...");
 
-  // Separate recognized skills into arrays
-  let hard_skills = skills.filter(skill =>
-    hardSkillCandidates.map(s => s.toLowerCase()).includes(skill.toLowerCase())
-  );
-  let soft_skills = skills.filter(skill =>
-    softSkillCandidates.map(s => s.toLowerCase()).includes(skill.toLowerCase())
-  );
+    const response = await openai.chat.completions.create({
+      model: "gpt-4o-mini",
+      messages: [
+        { 
+          role: "system", 
+          content: "You are a university professor expert in evaluating academic assignments." 
+        },
+        { 
+          role: "user", 
+          content: `Analyze the following assignment report for the subject "${subject}" about "${topic}". 
+                    Identify the main concepts, methodology used, and results obtained:\n\n${text}` 
+        },
+      ],
+      max_tokens: 500,
+      temperature: 0.7,
+    });
 
-  // Ensure we have at least 3 hard skills
-  while (hard_skills.length < 3) {
-    // Add placeholders from the candidate list if needed
-    const needed = 3 - hard_skills.length;
-    hard_skills = [...hard_skills, ...hardSkillCandidates.slice(0, needed)];
+    if (!response?.choices?.[0]?.message) {
+      throw new Error("Unexpected response from OpenAI");
+    }
+
+    return response.choices[0].message.content.trim();
+  } catch (error) {
+    console.error("Error in analyzeAssignmentReport:", error);
+    return "Error analyzing the report.";
   }
+}
 
-  // Ensure we have at least 2 soft skills
-  while (soft_skills.length < 2) {
-    const needed = 2 - soft_skills.length;
-    soft_skills = [...soft_skills, ...softSkillCandidates.slice(0, needed)];
-  }
-
-  // Build a prompt to generate exactly 5 questions
+/**
+ * Generate questions based on report analysis
+ */
+export async function generateQuestions(reportAnalysis, subject, topic) {
   const prompt = `
-Basado en las siguientes habilidades extraídas del CV, genera 5 preguntas de entrevista:
-- 5 preguntas sobre habilidades duras.
-- 5 preguntas sobre habilidades blandas.
+As a professor of "${subject}", generate 10 questions IN ENGLISH to evaluate the assignment about "${topic}", regardless of the language of the original report:
+- 5 questions about specific technical content from the report
+- 5 questions about the learning process and topic understanding
 
-Habilidades encontradas en el CV:
-${skills.join(", ")}
+Report analysis:
+${reportAnalysis}
 
-Unicamente responde en el siguiente formato, sin agregar nada mas:
-1. Pregunta sobre habilidad dura
-2. Pregunta sobre habilidad dura
-3. Pregunta sobre habilidad dura
-4. Pregunta sobre habilidad dura
-5. Pregunta sobre habilidad dura
-6. Pregunta sobre habilidad blanda
-7. Pregunta sobre habilidad blanda
-8. Pregunta sobre habilidad blanda
-9. Pregunta sobre habilidad blanda
-10. Pregunta sobre habilidad blanda
+Please respond only in English using the following format:
+1. Question about specific content
+2. Question about specific content
+3. Question about specific content
+4. Question about learning process
+5. Question about specific content
+6. Question about learning process
+7. Question about learning process
+8. Question about specific content
+9. Question about specific content
+10. Question about learning process
 `;
 
-  // Call GPT
   const response = await openai.chat.completions.create({
-    model: "gpt-4o-mini", // Or "gpt-3.5-turbo"
+    model: "gpt-4o-mini",
     messages: [{ role: "user", content: prompt }],
     max_tokens: 500,
     temperature: 0.7,
   });
 
-  // Split response into lines
   let questions = response.choices[0].message.content
     .split("\n")
     .map(q => q.trim())
     .filter(Boolean);
 
-  // If fewer than 5 lines, pad with placeholders
   while (questions.length < 10) {
-    questions.push(`${questions.length + 1}. Pregunta genérica de ejemplo.`);
+    questions.push(`${questions.length + 1}. Generic question about the topic.`);
   }
 
-  // Return only 5 lines
   return questions.slice(0, 10);
 }
 
 /**
- * Simple function to calculate a score based on detected skills.
+ * Calculate score based on answers evaluation
  */
-export function calculateScore(skills) {
-  const skillWeights = {
-    Python: 10,
-    "Machine Learning": 15,
-    "Data Analysis": 12,
-    Teamwork: 8,
-    Communication: 5,
-  };
-
-  const uniqueSkills = new Set(skills.map(s => s.trim()));
-  let totalScore = 0;
-
-  uniqueSkills.forEach(skill => {
-    // If skill is in the dictionary, use that weight; otherwise, default 5
-    totalScore += skillWeights[skill] || 5;
-  });
-
-  // Cap at 100
-  return Math.min(totalScore, 100);
-}
-
-/**
- * Calculates a score based on user's interview answers, returning a final score & explanations.
- */
-export async function calculateScoreBasedOnAnswers(questions, answers) {
+export async function calculateScoreBasedOnAnswers(questions, answers, subject) {
   try {
     if (!questions || !answers || questions.length !== answers.length) {
-      throw new Error("Número de preguntas y respuestas no coincide.");
+      throw new Error("Number of questions and answers don't match.");
     }
 
-    console.log("Enviando respuestas a GPT para evaluación...");
-
-    // Crear el prompt para GPT
     const prompt = `
-Eres un evaluador experto de entrevistas técnicas y de habilidades blandas. 
-Evalúa las siguientes respuestas en una escala del 0 al 100 según su calidad, claridad y relevancia para la pregunta. 
+As a professor of "${subject}", evaluate the following student answers.
+Consider:
+- For technical questions: accuracy, correct use of concepts and depth of knowledge
+- For process questions: reflection, understanding and analytical capacity
 
-Para cada respuesta, proporciona:
-1. Un puntaje entre 0 y 100.
-2. Una breve explicación de la evaluación.
+For each answer, provide:
+1. A score between 0 and 100
+2. Constructive feedback for the student
 
-Aquí están las preguntas y respuestas:
+Questions and answers:
+${questions.map((q, i) => `Question: ${q}\nAnswer: ${answers[i]}\n`).join("\n")}
 
-${questions.map((q, i) => `Pregunta: ${q}\nRespuesta: ${answers[i]}\n`).join("\n")}
-
-Responde en el siguiente formato:
+Respond in the following JSON format:
 [
-  { "score": 85, "explanation": "Respuesta clara y bien fundamentada con ejemplos." },
-  { "score": 70, "explanation": "Buena respuesta pero le falta detalle." },
+  { 
+    "score": 85, 
+    "feedback": "Good understanding of the concept. Suggestion: explore further..." 
+  },
   ...
 ]
-    `;
+`;
 
-    // Llamada a OpenAI
     const response = await openai.chat.completions.create({
       model: "gpt-4o-mini",
       messages: [{ role: "user", content: prompt }],
-      max_tokens: 500,
+      max_tokens: 1000,
       temperature: 0.7,
     });
 
-    // Obtener el JSON generado por GPT
     const evaluation = JSON.parse(response.choices[0].message.content);
-
-    // Calcular el puntaje total
     const total_score = evaluation.reduce((acc, item) => acc + item.score, 0) / evaluation.length;
 
     return {
@@ -296,11 +275,43 @@ Responde en el siguiente formato:
     };
 
   } catch (error) {
-    console.error("Error al evaluar respuestas:", error);
+    console.error("Error evaluating answers:", error);
     return {
       total_score: 0,
       evaluations: [],
-      error: "Error en la evaluación de respuestas",
+      error: "Error in answers evaluation",
     };
   }
 }
+
+/**
+ * Calculate initial score based on assignment analysis
+ */
+export function calculateScore(reportAnalysis) {
+  try {
+    // Criterios básicos de evaluación
+    const criteria = {
+      "Comprensión del tema": 30,
+      "Metodología aplicada": 25,
+      "Resultados y conclusiones": 25,
+      "Claridad y estructura": 20
+    };
+
+    let totalScore = 70; // Puntuación base
+
+    // Ajustar score basado en palabras clave en el análisis
+    if (reportAnalysis.toLowerCase().includes("metodología")) totalScore += 5;
+    if (reportAnalysis.toLowerCase().includes("análisis")) totalScore += 5;
+    if (reportAnalysis.toLowerCase().includes("conclusión")) totalScore += 5;
+    if (reportAnalysis.toLowerCase().includes("resultados")) totalScore += 5;
+    if (reportAnalysis.toLowerCase().includes("referencias")) totalScore += 5;
+    if (reportAnalysis.toLowerCase().includes("investigación")) totalScore += 5;
+
+    // Asegurar que el score esté entre 0 y 100
+    return Math.min(Math.max(totalScore, 0), 100);
+  } catch (error) {
+    console.error("Error en calculateScore:", error);
+    return 60; // Puntuación por defecto en caso de error
+  }
+}
+

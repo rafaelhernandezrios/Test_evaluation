@@ -41,4 +41,59 @@
   color: #0d535b;
   font-size: 1.2rem;
   font-weight: 500;
+}
+
+.modern-loading-animation {
+  position: relative;
+  width: 100px;
+  height: 100px;
+  margin: 0 auto;
+}
+
+.pulse-ring {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  border: 3px solid #3498db;
+  border-radius: 50%;
+  animation: pulse 2s ease-out infinite;
+}
+
+.pulse-core {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #fff;
+  border-radius: 50%;
+  z-index: 2;
+}
+
+.pulse-core i {
+  font-size: 2.5rem;
+  color: #3498db;
+}
+
+@keyframes pulse {
+  0% {
+    transform: scale(0.8);
+    opacity: 0;
+  }
+  50% {
+    transform: scale(1.2);
+    opacity: 0.5;
+  }
+  100% {
+    transform: scale(1.5);
+    opacity: 0;
+  }
+}
+
+.loading-text {
+  margin-top: 20px;
+  font-size: 1.2rem;
+  color: #3498db;
+  text-align: center;
 } 

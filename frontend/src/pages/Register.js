@@ -94,9 +94,9 @@ const Register = () => {
       <nav className="navbar navbar-expand-lg navbar-dark bg-gray py-2 fixed-top">
         <div className="container">
           <div className="navbar-brand-container d-flex align-items-center">
-            <img src={logo} alt="Logo Habilities" width="80" height="80" className="navbar-logo" />
+            <img src={logo} alt="MIRAI Logo" width="80" height="80" className="navbar-logo" />
             <a className="navbar-brand h1 text_format d-none d-lg-block" href="#" style={{ color: "#fff" }}>
-              Plataforma Inteligente MIRAI
+              MIRAI Intelligent Platform
             </a>
             <a className="navbar-brand h1 text_format d-lg-none" href="#" style={{ color: "#fff" }}>
               MIRAI
@@ -118,10 +118,10 @@ const Register = () => {
           <div className="collapse navbar-collapse justify-content-end" id="navbarNav">
             <ul className="navbar-nav">
               <li className="nav-item">
-                <Link className="nav-link px-3" to="/">Inicio</Link>
+                <Link className="nav-link px-3" to="/">Home</Link>
               </li>
               <li className="nav-item">
-                <Link className="nav-link px-3" to="/login">Iniciar Sesión</Link>
+                <Link className="nav-link px-3" to="/login">Login</Link>
               </li>
             </ul>
           </div>
@@ -130,16 +130,16 @@ const Register = () => {
 
       <div className="register-container">
         <div className="register-card">
-          <h2 className="register-title">Registro</h2>
+          <h2 className="register-title">Register</h2>
           <form onSubmit={handleSubmit}>
-            {/* Datos personales */}
-            <h4 className="section-title">Datos Personales</h4>
+            {/* Personal Information */}
+            <h4 className="section-title">Personal Information</h4>
             <div className="mb-3">
               <input
                 type="text"
                 name="name"
                 className="form-control"
-                placeholder="Nombre Completo"
+                placeholder="Full Name"
                 onChange={handleChange}
                 required
               />
@@ -149,7 +149,7 @@ const Register = () => {
                 type="email"
                 name="email"
                 className="form-control"
-                placeholder="Correo Electrónico"
+                placeholder="Email"
                 onChange={handleChange}
                 required
               />
@@ -159,7 +159,7 @@ const Register = () => {
                 type="password"
                 name="password"
                 className="form-control"
-                placeholder="Contraseña (mínimo 6 caracteres)"
+                placeholder="Password (minimum 6 characters)"
                 onChange={handleChange}
                 required
                 minLength="6"
@@ -172,11 +172,11 @@ const Register = () => {
                   <div className={`strength-bar ${passwordStrength >= 4 ? 'active' : ''}`}></div>
                 </div>
                 <small className="strength-text">
-                  {passwordStrength === 0 && "Muy débil"}
-                  {passwordStrength === 1 && "Débil"}
-                  {passwordStrength === 2 && "Media"}
-                  {passwordStrength === 3 && "Fuerte"}
-                  {passwordStrength === 4 && "Muy fuerte"}
+                  {passwordStrength === 0 && "Very weak"}
+                  {passwordStrength === 1 && "Weak"}
+                  {passwordStrength === 2 && "Medium"}
+                  {passwordStrength === 3 && "Strong"}
+                  {passwordStrength === 4 && "Very strong"}
                 </small>
               </div>
             </div>
@@ -185,14 +185,14 @@ const Register = () => {
                 type="password"
                 name="confirmPassword"
                 className={`form-control ${form.confirmPassword ? (passwordMatch ? 'is-valid' : 'is-invalid') : ''}`}
-                placeholder="Confirmar contraseña (mínimo 6 caracteres)"
+                placeholder="Confirm password"
                 onChange={handleChange}
                 required
                 minLength="6"
               />
               {form.confirmPassword && !passwordMatch && (
                 <div className="invalid-feedback">
-                  Las contraseñas no coinciden
+                  Passwords do not match
                 </div>
               )}
             </div>
@@ -201,7 +201,7 @@ const Register = () => {
                 type="tel"
                 name="phone"
                 className="form-control"
-                placeholder="Teléfono"
+                placeholder="Phone"
                 onChange={handleChange}
                 required
               />
@@ -220,7 +220,7 @@ const Register = () => {
                 type="text"
                 name="nationality"
                 className="form-control"
-                placeholder="Nacionalidad"
+                placeholder="Nationality"
                 onChange={handleChange}
                 required
               />
@@ -232,21 +232,21 @@ const Register = () => {
                 onChange={handleChange}
                 required
               >
-                <option value="">Selecciona tu género</option>
-                <option value="Masculino">Masculino</option>
-                <option value="Femenino">Femenino</option>
-                <option value="Otro">Otro</option>
+                <option value="">Select your gender</option>
+                <option value="Male">Male</option>
+                <option value="Female">Female</option>
+                <option value="Other">Other</option>
               </select>
             </div>
 
-            {/* Datos de la carrera/universidad */}
-            <h4 className="section-title">Datos Universitarios</h4>
+            {/* Academic Information */}
+            <h4 className="section-title">Academic Information</h4>
             <div className="mb-3">
               <input
                 type="text"
                 name="institution"
                 className="form-control"
-                placeholder="Institución"
+                placeholder="Institution"
                 onChange={handleChange}
                 required
               />
@@ -256,7 +256,7 @@ const Register = () => {
                 type="text"
                 name="title"
                 className="form-control"
-                placeholder="Título Académico"
+                placeholder="Academic Title"
                 onChange={handleChange}
                 required
               />
@@ -266,7 +266,7 @@ const Register = () => {
                 type="text"
                 name="research_area"
                 className="form-control"
-                placeholder="Área de Investigación"
+                placeholder="Research Area"
                 onChange={handleChange}
                 required
               />
@@ -278,10 +278,10 @@ const Register = () => {
                 onChange={handleChange}
                 required
               >
-                <option value="">Selecciona un grado académico</option>
-                <option value="Secundaria">Secundaria</option>
-                <option value="Media Superior">Media Superior</option>
-                <option value="Superior">Superior</option>
+                <option value="">Select academic level</option>
+                <option value="Secondary">Secondary</option>
+                <option value="High School">High School</option>
+                <option value="University">University</option>
               </select>
             </div>
             <div className="mb-3">
@@ -289,7 +289,7 @@ const Register = () => {
                 type="text"
                 name="student_id"
                 className="form-control"
-                placeholder="Matrícula o ID Estudiantil"
+                placeholder="Student ID"
                 onChange={handleChange}
                 required
               />
@@ -299,7 +299,7 @@ const Register = () => {
                 type="text"
                 name="semester"
                 className="form-control"
-                placeholder="Semestre"
+                placeholder="Semester"
                 onChange={handleChange}
                 required
               />
@@ -309,21 +309,21 @@ const Register = () => {
                 type="text"
                 name="program"
                 className="form-control"
-                placeholder="Programa o Carrera"
+                placeholder="Program or Major"
                 onChange={handleChange}
                 required
               />
             </div>
 
             <button type="submit" className="btn btn-register w-100">
-              Registrarse
+              Register
             </button>
           </form>
           {message && <p className="register-message">{message}</p>}
 
           <div className="register-footer">
             <p>
-              ¿Ya tienes cuenta? <a href="/login">Inicia sesión aquí</a>
+              Already have an account? <Link to="/login">Login here</Link>
             </p>
           </div>
         </div>

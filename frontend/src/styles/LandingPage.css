@@ -93,9 +93,10 @@ body {
 
 /* Caja de Propósito con Fondo */
 .purpose-box {
-  background: rgba(24, 122, 161, 0.85);
+  background: rgba(13, 83, 91, 0.9);
   padding: 40px;
-  border-radius: 10px;
+  border-radius: 15px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
   display: inline-block;
   max-width: 800px;
   text-align: center;
@@ -118,9 +119,15 @@ body {
 }
 
 .icon-feature {
-  font-size: 2.5rem;
+  font-size: 2.8rem;
   color: #0d535b;
-  margin-bottom: 15px;
+  margin-bottom: 20px;
+  display: inline-block;
+  transition: transform 0.3s ease;
+}
+
+.icon-feature:hover {
+  transform: scale(1.1);
 }
 
 h4 {
@@ -238,4 +245,14 @@ p {
 /* Ajustar los estilos del navbar collapse */
 .navbar-collapse {
   flex-grow: 0; /* Evita que el collapse ocupe todo el espacio disponible */
+}
+
+/* Actualizar estilos de las tarjetas de características */
+.col-md-6 {
+  padding: 20px;
+}
+
+.col-md-6:hover {
+  transform: translateY(-5px);
+  transition: transform 0.3s ease;
 }

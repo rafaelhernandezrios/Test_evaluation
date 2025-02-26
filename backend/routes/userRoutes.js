@@ -107,8 +107,7 @@ router.get("/status", authMiddleware, async (req, res) => {
     res.json({
       cvUploaded: !!user.cvPath,
       cvAnalyzed: user.cvAnalyzed || false,
-      softSkillsSurvey: user.softSkillsSurveyCompleted || false,
-      hardSkillsSurvey: user.hardSkillsSurveyCompleted || false,
+      interviewCompleted: user.interviewCompleted || false,
     });
   } catch (error) {
     console.error("Error fetching user status:", error);
@@ -123,46 +122,45 @@ router.post("/analyze-cv", authMiddleware, async (req, res) => {
   try {
     console.log("Iniciando análisis de CV para el usuario:", req.userId);
 
+    // Instead of findById and save, use findOneAndUpdate
     const user = await User.findById(req.userId);
     if (!user || !user.cvPath) {
       return res.status(404).json({ message: "No CV stored for analysis" });
     }
 
-    // Eliminar la verificación de archivo local ya que el archivo está en S3
-    // En su lugar, intentar extraer texto directamente desde la URL de S3
     const cvText = await extractTextFromPdf(user.cvPath);
-
-    // 3. Analyze with GPT to get a summary or skill list
     const analysisResult = await analyzeCvText(cvText);
-
-    // 4. Convert the analysis text into an array of skills
-    //    This depends on how 'analysisResult' is structured.
-    //    For now, assume it's a comma-separated list of skills or something similar.
     const allSkills = analysisResult
       .split(",")
       .map((skill) => skill.trim())
       .filter(Boolean);
-
-    // 5. Generate interview questions
     const questions = await generateQuestions(allSkills);
-
-    // 6. Calculate a skill-based score
     const score = Math.min(allSkills.length * 10, 100);
 
-    // 7. Save to the DB
-    user.cvText = cvText;
-    user.analysis = analysisResult;
-    user.skills = allSkills;
-    user.questions = questions;
-    user.score = score;
-    user.cvAnalyzed = true;
+    // Use findOneAndUpdate instead of save
+    const updatedUser = await User.findOneAndUpdate(
+      { _id: req.userId },
+      {
+        $set: {
+          cvText: cvText,
+          analysis: analysisResult,
+          skills: allSkills,
+          questions: questions,
+          score: score,
+          cvAnalyzed: true
+        }
+      },
+      { new: true, runValidators: true }
+    );
 
-    await user.save();
+    if (!updatedUser) {
+      return res.status(404).json({ message: "User not found during update" });
+    }
 
-    console.log("CV analizado con éxito para el usuario:", user._id);
+    console.log("CV analizado con éxito para el usuario:", updatedUser._id);
     res.json({ 
       message: "CV analizado con éxito", 
-      userId: user._id,
+      userId: updatedUser._id,
       questions,
       score
     });
@@ -303,6 +301,75 @@ router.post("/submit-hard-skills", authMiddleware, async (req, res) => {
   } catch (error) {
     console.error("Error al procesar el cuestionario:", error);
     res.status(500).json({ message: "Error interno del servidor" });
+  }
+});
+
+// Agregar estas rutas en userRoutes.js
+router.delete('/delete-cv', authMiddleware, async (req, res) => {
+  try {
+    const user = await User.findById(req.userId);
+    if (!user) {
+      return res.status(404).json({ message: "Usuario no encontrado" });
+    }
+
+    user.cvPath = "";
+    user.cvFile = undefined;
+    user.cvText = "";
+    user.cvAnalyzed = false;
+    user.analysis = "";
+    user.skills = [];
+    user.questions = [];
+    user.score = 0;
+    user.interviewResponses = [];
+    user.interviewScore = 0;
+    user.interviewAnalysis = [];
+    user.interviewCompleted = false;
+    
+    await user.save();
+    res.json({ message: "CV y datos relacionados eliminados correctamente" });
+  } catch (error) {
+    console.error("Error al eliminar CV:", error);
+    res.status(500).json({ message: "Error al eliminar CV" });
+  }
+});
+
+router.delete('/delete-interview', authMiddleware, async (req, res) => {
+  try {
+    const user = await User.findById(req.userId);
+    if (!user) {
+      return res.status(404).json({ message: "Usuario no encontrado" });
+    }
+
+    user.interviewResponses = [];
+    user.interviewScore = 0;
+    user.interviewAnalysis = [];
+    user.interviewCompleted = false;
+    
+    await user.save();
+    res.json({ message: "Entrevista eliminada correctamente" });
+  } catch (error) {
+    console.error("Error al eliminar entrevista:", error);
+    res.status(500).json({ message: "Error al eliminar entrevista" });
+  }
+});
+
+//-------------------------------------------//
+// Get interview questions                    //
+//-------------------------------------------//
+router.get("/interview-questions", authMiddleware, async (req, res) => {
+  try {
+    const user = await User.findById(req.userId);
+    if (!user || !user.questions || user.questions.length === 0) {
+      return res.status(404).json({ message: "No questions available" });
+    }
+
+    return res.json({
+      questions: user.questions
+    });
+
+  } catch (error) {
+    console.error("Error fetching interview questions:", error);
+    return res.status(500).json({ message: "Error interno del servidor" });
   }
 });
 

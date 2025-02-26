@@ -31,7 +31,7 @@ const Login = () => {
     try {
       const res = await axios.post(`${process.env.REACT_APP_API_BASE_URL}/api/auth/login`, form);
       localStorage.setItem("token", `Bearer ${res.data.token}`);
-      setMessage("Inicio de sesión exitoso. Redirigiendo...");
+      setMessage("Login successful. Redirecting...");
       setTimeout(() => navigate("/dashboard"), 2000);
     } catch (error) {
       setMessage(error.response.data.message);
@@ -44,9 +44,9 @@ const Login = () => {
       <nav className="navbar navbar-expand-lg navbar-dark bg-gray py-2 fixed-top">
         <div className="container">
           <div className="navbar-brand-container d-flex align-items-center">
-            <img src={logo} alt="Logo Habilities" width="80" height="80" className="navbar-logo" />
+            <img src={logo} alt="MIRAI Logo" width="80" height="80" className="navbar-logo" />
             <a className="navbar-brand h1 text_format d-none d-lg-block" href="#" style={{ color: "#fff" }}>
-              Plataforma Inteligente MIRAI
+              MIRAI Intelligent Platform
             </a>
             <a className="navbar-brand h1 text_format d-lg-none" href="#" style={{ color: "#fff" }}>
               MIRAI
@@ -68,10 +68,10 @@ const Login = () => {
           <div className="collapse navbar-collapse justify-content-end" id="navbarNav">
             <ul className="navbar-nav">
               <li className="nav-item">
-                <Link className="nav-link px-3" to="/">Inicio</Link>
+                <Link className="nav-link px-3" to="/">Home</Link>
               </li>
               <li className="nav-item">
-                <Link className="nav-link px-3" to="/register">Registrarse</Link>
+                <Link className="nav-link px-3" to="/register">Register</Link>
               </li>
             </ul>
           </div>
@@ -81,14 +81,14 @@ const Login = () => {
       {/* Login Form */}
       <div className="login-container">
         <div className="login-card">
-          <h2 className="login-title">Iniciar Sesión</h2>
+          <h2 className="login-title">Login</h2>
           <form onSubmit={handleSubmit}>
             <div className="mb-3">
               <input
                 type="email"
                 name="email"
                 className="form-control"
-                placeholder="Correo Electrónico"
+                placeholder="Email"
                 onChange={handleChange}
                 required
               />
@@ -98,19 +98,19 @@ const Login = () => {
                 type="password"
                 name="password"
                 className="form-control"
-                placeholder="Contraseña"
+                placeholder="Password"
                 onChange={handleChange}
                 required
               />
             </div>
             <button type="submit" className="btn btn-login w-100">
-              Iniciar Sesión
+              Login
             </button>
           </form>
           {message && <p className="text-danger login-message">{message}</p>}
 
           <div className="login-footer">
-            <p>¿No tienes cuenta? <Link to="/register">Regístrate aquí</Link></p>
+            <p>Don't have an account? <Link to="/register">Register here</Link></p>
           </div>
         </div>
       </div>
