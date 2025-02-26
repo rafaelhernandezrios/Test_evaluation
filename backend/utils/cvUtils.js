@@ -1,4 +1,5 @@
 import fs from "fs/promises";
+global.module = { parent: true };  // Simula que el código NO es un script de prueba
 import pdf from "pdf-parse";
 import OpenAI from "openai";
 import dotenv from "dotenv";
