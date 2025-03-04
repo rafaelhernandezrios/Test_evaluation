@@ -9,9 +9,13 @@ import SoftSkills from './pages/SoftSkills';
 import HardSkills from './pages/HardSkills';
 import AnalyzeCV from './pages/AnalyzeCV'; 
 import PrivateRoute from './components/PrivateRoute';
+import AdminRoute from './components/AdminRoute';
 import SoftSkillsResults from './pages/SoftSkillsResults';
 import HardSkillsResults from './pages/HardSkillsResults';
 import InterviewResults from './pages/InterviewResults';
+import AdminDashboard from './pages/AdminDashboard';
+import AdminInterviewView from './pages/AdminInterviewView';
+
 function App() {
   return (
     <Router>
@@ -75,7 +79,20 @@ function App() {
             </PrivateRoute>
           }
          />
-        </Routes>
+         <Route
+          path="/admin"
+          element={
+            <AdminRoute>
+              <AdminDashboard />
+            </AdminRoute>
+          }
+         />
+         <Route path="/admin/interview/:userId" element={
+          <AdminRoute>
+            <AdminInterviewView />
+          </AdminRoute>
+        } />
+      </Routes>
     </Router>
   );
 }

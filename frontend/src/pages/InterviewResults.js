@@ -63,17 +63,17 @@ const InterviewResults = () => {
     
     // Add title
     doc.setFontSize(16);
-    doc.text('RESULTADOS DE LA ENTREVISTA', 20, yPos);
+    doc.text('INTERVIEW RESULTS', 20, yPos);
     yPos += 15;
 
     // Add total score
     doc.setFontSize(14);
-    doc.text(`PUNTAJE TOTAL: ${interviewData.score}/100`, 20, yPos);
+    doc.text(`TOTAL SCORE: ${interviewData.score}/100`, 20, yPos);
     yPos += 20;
 
     // Add analysis section
     doc.setFontSize(14);
-    doc.text('ANÁLISIS DETALLADO', 20, yPos);
+    doc.text('DETAILED ANALYSIS', 20, yPos);
     yPos += 10;
 
     // Add each analysis item
@@ -85,7 +85,7 @@ const InterviewResults = () => {
       }
 
       doc.setFontSize(12);
-      doc.text(`Criterio ${index + 1}`, 20, yPos);
+      doc.text(`Criterion ${index + 1}`, 20, yPos);
       yPos += 7;
       doc.text(`Puntaje: ${item.score}`, 20, yPos);
       yPos += 7;
@@ -104,7 +104,7 @@ const InterviewResults = () => {
     });
 
     // Save the PDF
-    doc.save(`Resultados_Entrevista_${new Date().toLocaleDateString()}.pdf`);
+    doc.save(`Interview_Results_${new Date().toLocaleDateString()}.pdf`);
   };
 
   const renderContent = () => {
@@ -186,10 +186,21 @@ const InterviewResults = () => {
       {/* Navbar */}
       <nav className="navbar navbar-expand-lg navbar-dark bg-gray py-3 fixed-top">
         <div className="container-fluid">
-          <img src={logo} alt="MIRAI Logo" width="150" height="150" />
-          <Link className="navbar-brand h1 text_format" to="/dashboard" style={{ color: "#fff" }}>
-            MIRAI Intelligent Platform for Academic Evaluation
-          </Link>
+          <div className="d-flex align-items-center" style={{ maxWidth: '80%' }}>
+            <img 
+              src={logo} 
+              alt="MIRAI Logo" 
+              style={{ 
+                height: '60px',
+                width: 'auto',
+                maxWidth: '100%',
+                marginRight: '1rem'
+              }} 
+            />
+            <Link className="navbar-brand h1 text_format" to="/dashboard" style={{ color: "#fff" }}>
+              AI-based Academic Assessment
+            </Link>
+          </div>
           
           <button
             className="navbar-toggler"
@@ -202,6 +213,11 @@ const InterviewResults = () => {
 
           <div className="collapse navbar-collapse" id="navbarNav">
             <ul className="navbar-nav ms-auto">
+              <li className="nav-item">
+                <Link className="nav-link" to="/dashboard">
+                  <i className="bi bi-house-door"></i> Dashboard
+                </Link>
+              </li>
               <li className="nav-item">
                 <Link className="nav-link" to="/profile">
                   <i className="bi bi-person-circle"></i> Profile
@@ -272,19 +288,19 @@ const InterviewResults = () => {
                 <div className="score-circle" style={{ '--score': `${interviewData?.score || 0}%` }}>
                   <div className="score-value">
                     <h3>{interviewData?.score || 0}</h3>
-                    <p>Puntos</p>
+                    <p>Points</p>
                   </div>
                 </div>
                 <div className="score-label">
-                  <h4>Puntaje Total</h4>
-                  <p>Basado en tus respuestas y análisis de IA</p>
+                  <h4>Total Score</h4>
+                  <p>Based on your answers and AI analysis</p>
                 </div>
               </div>
 
               <div className="overview-analysis">
                 <h3>
                   <i className="bi bi-graph-up"></i>
-                  Resumen del Análisis
+                  Analysis Summary
                 </h3>
                 <div className="analysis-grid">
                   {interviewData?.analysis.map((item, index) => (
@@ -305,10 +321,10 @@ const InterviewResults = () => {
 
               <div className="results-actions">
                 <button className="btn btn-primary" onClick={handleDownload}>
-                  <i className="bi bi-download"></i> Descargar Resultados Completos
+                  <i className="bi bi-download"></i> Download Complete Results
                 </button>
                 <button className="btn btn-outline-primary" onClick={() => navigate("/dashboard")}>
-                  Volver al Dashboard
+                  Return to Dashboard
                 </button>
               </div>
             </div>

@@ -3,6 +3,7 @@ import path from "path";
 import fs from "fs";
 import fsPromises from "fs/promises"; // For async operations like fsPromises.mkdir, fsPromises.writeFile
 import { fileURLToPath } from "url";
+import { S3Client, DeleteObjectCommand } from "@aws-sdk/client-s3";
 
 import { authMiddleware } from "../routes/authRoutes.js";
 import upload from "../middleware/upload.js";
@@ -20,12 +21,30 @@ import {
   calculateScoreBasedOnAnswers,
 } from "../utils/cvUtils.js"; // Adjust the import path as needed
 
+// Load environment variables
 dotenv.config();
+
+// Log S3 configuration for debugging
+console.log("S3 Configuration:");
+console.log("AWS Region:", process.env.AWS_REGION);
+console.log("AWS Bucket Name:", process.env.AWS_BUCKET_NAME);
+console.log("AWS Access Key ID:", process.env.AWS_ACCESS_KEY_ID ? "Set" : "Not set");
+console.log("AWS Secret Access Key:", process.env.AWS_SECRET_ACCESS_KEY ? "Set" : "Not set");
+
 const router = express.Router();
 
 // Handy for building absolute paths
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
+
+// Configure S3 client
+const s3Client = new S3Client({
+  region: process.env.AWS_REGION || "us-east-2",
+  credentials: {
+    accessKeyId: process.env.AWS_ACCESS_KEY_ID,
+    secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
+  },
+});
 
 //--------------------------------------//
 // Upload CV (Protected) to Disk        //
@@ -65,16 +84,27 @@ router.post("/upload-cv", authMiddleware, upload.single("file"), async (req, res
 //--------------------------------------//
 router.get("/cv", authMiddleware, async (req, res) => {
   try {
+    console.log("CV path request received for user ID:", req.userId);
+    
     const user = await User.findById(req.userId);
-    if (!user || !user.cvPath) {
+    if (!user) {
+      console.log("User not found with ID:", req.userId);
+      return res.status(404).json({ message: "User not found" });
+    }
+    
+    console.log("User found, CV path:", user.cvPath);
+    
+    if (!user.cvPath) {
+      console.log("No CV path found for user");
       return res.status(404).json({ message: "No CV available" });
     }
 
     // Return the file path stored in the database
+    console.log("Returning CV path:", user.cvPath);
     res.json({ filePath: user.cvPath });
   } catch (error) {
     console.error("Error fetching CV:", error);
-    res.status(500).json({ message: "Error fetching CV", error });
+    res.status(500).json({ message: "Error fetching CV", error: error.message });
   }
 });
 
@@ -87,7 +117,24 @@ router.get("/me", authMiddleware, async (req, res) => {
     if (!user) {
       return res.status(404).json({ message: "User not found" });
     }
-    res.json(user);
+    
+    // Return user data including role and cvPath
+    res.json({
+      _id: user._id,
+      name: user.name,
+      email: user.email,
+      role: user.role,
+      // Academic Information
+      institution: user.institution,
+      title: user.title,
+      module: user.module,
+      programme_code: user.programme_code,
+      program: user.program,
+      // CV related fields
+      cvPath: user.cvPath || "",
+      cvAnalyzed: user.cvAnalyzed || false,
+      interviewCompleted: user.interviewCompleted || false
+    });
   } catch (error) {
     console.error("Error fetching user:", error);
     res.status(500).json({ message: "Error fetching the user", error });
@@ -304,14 +351,58 @@ router.post("/submit-hard-skills", authMiddleware, async (req, res) => {
   }
 });
 
-// Agregar estas rutas en userRoutes.js
+// Delete CV route - completely rewritten
 router.delete('/delete-cv', authMiddleware, async (req, res) => {
   try {
+    console.log("Delete CV request received for user ID:", req.userId);
+    
     const user = await User.findById(req.userId);
     if (!user) {
+      console.log("User not found with ID:", req.userId);
       return res.status(404).json({ message: "Usuario no encontrado" });
     }
 
+    console.log("User found, CV path:", user.cvPath);
+
+    // Check if user has a CV path
+    if (!user.cvPath) {
+      console.log("No CV path found for user");
+      return res.status(400).json({ message: "No CV found for this user" });
+    }
+
+    // If the file is stored in S3
+    if (user.cvPath.includes('amazonaws.com')) {
+      try {
+        // Extract the key from the S3 URL
+        const urlParts = user.cvPath.split('/');
+        const key = urlParts[urlParts.length - 1];
+        console.log("Attempting to delete S3 file with key:", key);
+        console.log("AWS Bucket Name:", process.env.AWS_BUCKET_NAME);
+
+        // Check if bucket name is set
+        if (!process.env.AWS_BUCKET_NAME) {
+          console.error("AWS_BUCKET_NAME is not set in environment variables");
+          // Continue with user document update even if S3 deletion fails
+        } else {
+          // Delete from S3
+          const deleteCommand = new DeleteObjectCommand({
+            Bucket: process.env.AWS_BUCKET_NAME,
+            Key: key,
+          });
+
+          await s3Client.send(deleteCommand);
+          console.log("S3 file deleted successfully");
+        }
+      } catch (s3Error) {
+        console.error("Error deleting file from S3:", s3Error);
+        // Continue with user document update even if S3 deletion fails
+      }
+    } else {
+      console.log("CV is not stored in S3, skipping S3 deletion");
+    }
+
+    // Update user document
+    console.log("Updating user document to remove CV data");
     user.cvPath = "";
     user.cvFile = undefined;
     user.cvText = "";
@@ -319,17 +410,14 @@ router.delete('/delete-cv', authMiddleware, async (req, res) => {
     user.analysis = "";
     user.skills = [];
     user.questions = [];
-    user.score = 0;
-    user.interviewResponses = [];
-    user.interviewScore = 0;
-    user.interviewAnalysis = [];
-    user.interviewCompleted = false;
     
     await user.save();
-    res.json({ message: "CV y datos relacionados eliminados correctamente" });
+    console.log("User document updated successfully");
+    
+    res.json({ message: "CV deleted successfully" });
   } catch (error) {
-    console.error("Error al eliminar CV:", error);
-    res.status(500).json({ message: "Error al eliminar CV" });
+    console.error("Error deleting CV:", error);
+    res.status(500).json({ message: "Error deleting CV", error: error.message });
   }
 });
 
@@ -370,6 +458,42 @@ router.get("/interview-questions", authMiddleware, async (req, res) => {
   } catch (error) {
     console.error("Error fetching interview questions:", error);
     return res.status(500).json({ message: "Error interno del servidor" });
+  }
+});
+
+// Delete CV route
+router.delete("/delete-cv/:userId", authMiddleware, async (req, res) => {
+  try {
+    const user = await User.findById(req.params.userId);
+    
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    if (!user.cvPath) {
+      return res.status(400).json({ message: "No CV found for this user" });
+    }
+
+    // Extract the key from the S3 URL
+    const key = user.cvPath.split('/').pop();
+
+    // Delete from S3
+    const deleteCommand = new DeleteObjectCommand({
+      Bucket: process.env.AWS_BUCKET_NAME,
+      Key: key,
+    });
+
+    await s3Client.send(deleteCommand);
+
+    // Update user document
+    user.cvPath = null;
+    user.cvAnalyzed = false;
+    await user.save();
+
+    res.json({ message: "CV deleted successfully" });
+  } catch (error) {
+    console.error("Error deleting CV:", error);
+    res.status(500).json({ message: "Error deleting CV" });
   }
 });
 

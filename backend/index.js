@@ -26,10 +26,12 @@ connectDB(); // Asegúrate de llamar a connectDB aquí
 import {authRoutes} from "./routes/authRoutes.js"; 
 import surveyRoutes from "./routes/surveyRoutes.js";
 import userRoutes from "./routes/userRoutes.js";
+import admin from "./routes/admin.js";
 
 app.use("/api/auth", authRoutes);
 app.use("/api/surveys", surveyRoutes);
 app.use("/api/users", userRoutes);
+app.use("/api/admin", admin);
 
 const PORT = process.env.PORT || 20352;
 app.listen(PORT, () => {

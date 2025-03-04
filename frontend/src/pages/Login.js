@@ -31,8 +31,12 @@ const Login = () => {
     try {
       const res = await axios.post(`${process.env.REACT_APP_API_BASE_URL}/api/auth/login`, form);
       localStorage.setItem("token", `Bearer ${res.data.token}`);
+      localStorage.setItem("userRole", res.data.role);
       setMessage("Login successful. Redirecting...");
-      setTimeout(() => navigate("/dashboard"), 2000);
+      
+      // Redirect to admin dashboard if user is admin, otherwise to regular dashboard
+      const redirectPath = res.data.role === 'admin' ? '/admin' : '/dashboard';
+      setTimeout(() => navigate(redirectPath), 2000);
     } catch (error) {
       setMessage(error.response.data.message);
     }

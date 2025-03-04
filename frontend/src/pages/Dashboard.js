@@ -5,6 +5,7 @@ import "bootstrap/dist/css/bootstrap.min.css";
 import "../styles/Dashboard.css";
 import logo from "../assets/logo1.png"; // Importar el logo
 import 'bootstrap-icons/font/bootstrap-icons.css'; // Asegúrate de tener esta importación
+import { toast } from "react-hot-toast";
 
 const Dashboard = () => {
   const [user, setUser] = useState(null);
@@ -16,35 +17,48 @@ const Dashboard = () => {
   const [mainContent, setMainContent] = useState('overview');
   const navigate = useNavigate();
   const [showSidebar, setShowSidebar] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false);
+  const [showPdfModal, setShowPdfModal] = useState(false);
+
+  // Move fetchUserData outside useEffect
+  const fetchUserData = async () => {
+    const token = localStorage.getItem("token");
+    console.log("API Base URL:", process.env.REACT_APP_API_BASE_URL);
+    
+    if (!token) {
+      navigate("/login");
+      return;
+    }
+
+    try {
+      // Get user data
+      const userResponse = await axios.get(`${process.env.REACT_APP_API_BASE_URL}/api/users/me`, {
+        headers: { Authorization: token },
+      });
+      setUser(userResponse.data);
+      setIsAdmin(userResponse.data.role === 'admin');
+
+      // Get user status
+      const statusResponse = await axios.get(`${process.env.REACT_APP_API_BASE_URL}/api/users/status`, {
+        headers: { Authorization: token },
+      });
+      console.log("Status received:", statusResponse.data); // For debugging
+      setStatus(statusResponse.data);
+    } catch (error) {
+      console.error("Error fetching user:", error);
+    }
+  };
 
   useEffect(() => {
-    const fetchUserData = async () => {
-      const token = localStorage.getItem("token");
-      if (!token) {
-        navigate("/login");
-        return;
-      }
-
-      try {
-        // Get user data
-        const userResponse = await axios.get(`${process.env.REACT_APP_API_BASE_URL}/api/users/me`, {
-          headers: { Authorization: token },
-        });
-        setUser(userResponse.data);
-
-        // Get user status
-        const statusResponse = await axios.get(`${process.env.REACT_APP_API_BASE_URL}/api/users/status`, {
-          headers: { Authorization: token },
-        });
-        console.log("Status received:", statusResponse.data); // For debugging
-        setStatus(statusResponse.data);
-      } catch (error) {
-        console.error("Error fetching user:", error);
-      }
-    };
-
     fetchUserData();
   }, [navigate]);
+
+  // Add a debug effect to log the user's cvPath whenever it changes
+  useEffect(() => {
+    if (user) {
+      console.log("Current user cvPath:", user.cvPath);
+    }
+  }, [user]);
 
   const handleUpload = async (e) => {
     e.preventDefault();
@@ -88,19 +102,6 @@ const Dashboard = () => {
     setActiveSection(section);
     
     switch(section) {
-      case 'cv':
-        if (status?.cvUploaded) {
-          navigate('/analyze-cv');
-        } else {
-          setShowModal(true);
-        }
-        break;
-      
-      case 'skills':
-        // Mostrar menú de evaluaciones
-        setMainContent('skills');
-        break;
-        
       default:
         setMainContent('overview');
         break;
@@ -113,15 +114,74 @@ const Dashboard = () => {
     }
   };
 
-  const handleDeleteReport = async () => {
-    const token = localStorage.getItem("token");
+  const handleViewReport = async () => {
+    console.log("View report clicked, user object:", user);
+    
     try {
-      await axios.delete(`${process.env.REACT_APP_API_BASE_URL}/api/users/delete-cv`, {
+      // Get the CV path directly from the API
+      const token = localStorage.getItem("token");
+      const response = await axios.get(`${process.env.REACT_APP_API_BASE_URL}/api/users/cv`, {
         headers: { Authorization: token },
       });
-      window.location.reload();
+      
+      console.log("CV path response:", response.data);
+      
+      if (response.data && response.data.filePath) {
+        // Open the PDF in a new tab
+        console.log("Opening URL:", response.data.filePath);
+        window.open(response.data.filePath, '_blank');
+      } else {
+        toast.error("No report path found in the response");
+      }
     } catch (error) {
-      console.error("Error al eliminar el reporte:", error);
+      console.error("Error fetching or opening PDF:", error);
+      if (error.response && error.response.status === 404) {
+        toast.error("No report available to view");
+      } else {
+        toast.error("Error opening the PDF");
+      }
+    }
+  };
+
+  const handleDeleteReport = async () => {
+    if (window.confirm('¿Estás seguro de que quieres eliminar este reporte? Esta acción no se puede deshacer.')) {
+      try {
+        // First check if the CV exists
+        const token = localStorage.getItem("token");
+        
+        try {
+          // Try to get the CV path first to confirm it exists
+          await axios.get(`${process.env.REACT_APP_API_BASE_URL}/api/users/cv`, {
+            headers: { Authorization: token },
+          });
+        } catch (error) {
+          // If 404, the CV doesn't exist
+          if (error.response && error.response.status === 404) {
+            toast.error("No report to delete");
+            return;
+          }
+          // For other errors, continue with deletion attempt
+        }
+        
+        console.log("Proceeding with CV deletion");
+        
+        // Delete the CV
+        const response = await axios.delete(`${process.env.REACT_APP_API_BASE_URL}/api/users/delete-cv`, {
+          headers: {
+            Authorization: token
+          }
+        });
+
+        console.log("Delete response:", response.data);
+
+        // Refresh user data after deletion
+        await fetchUserData();
+        
+        toast.success('Report deleted successfully');
+      } catch (error) {
+        console.error('Error deleting report:', error);
+        toast.error('Error deleting report. Please try again.');
+      }
     }
   };
 
@@ -146,13 +206,7 @@ const Dashboard = () => {
         </div>
       </div>
       <div className="profile-details">
-        <div className="detail-item">
-          <i className="bi bi-telephone"></i>
-          <div className="detail-content">
-            <span className="detail-label">Phone: </span>
-            <span className="detail-value">{user?.phone || 'Not specified'}</span>
-          </div>
-        </div>
+        <h4 className="section-title mb-3">Academic Information</h4>
         
         <div className="detail-item">
           <i className="bi bi-building"></i>
@@ -165,32 +219,32 @@ const Dashboard = () => {
         <div className="detail-item">
           <i className="bi bi-award"></i>
           <div className="detail-content">
-            <span className="detail-label">Title: </span>
+            <span className="detail-label">Academic Title: </span>
             <span className="detail-value">{user?.title || 'Not specified'}</span>
           </div>
         </div>
 
         <div className="detail-item">
-          <i className="bi bi-mortarboard"></i>
+          <i className="bi bi-journal-text"></i>
           <div className="detail-content">
-            <span className="detail-label">Academic Level: </span>
-            <span className="detail-value">{user?.academic_level || 'Not specified'}</span>
+            <span className="detail-label">Module: </span>
+            <span className="detail-value">{user?.module || 'Not specified'}</span>
+          </div>
+        </div>
+
+        <div className="detail-item">
+          <i className="bi bi-hash"></i>
+          <div className="detail-content">
+            <span className="detail-label">Programme Code: </span>
+            <span className="detail-value">{user?.programme_code || 'Not specified'}</span>
           </div>
         </div>
 
         <div className="detail-item">
           <i className="bi bi-book"></i>
           <div className="detail-content">
-            <span className="detail-label">Program: </span>
+            <span className="detail-label">Program or Major: </span>
             <span className="detail-value">{user?.program || 'Not specified'}</span>
-          </div>
-        </div>
-
-        <div className="detail-item">
-          <i className="bi bi-calendar3"></i>
-          <div className="detail-content">
-            <span className="detail-label">Semester: </span>
-            <span className="detail-value">{user?.semester || 'Not specified'}</span>
           </div>
         </div>
       </div>
@@ -207,15 +261,15 @@ const Dashboard = () => {
 
   return (
     <>
-      {/* Navbar estilo LandingPage */}
+      {/* Navbar with reduced height */}
       <nav className="navbar navbar-expand-lg navbar-dark bg-gray py-2 fixed-top">
-        <div className="container">
+        <div className="container-fluid px-3">
           <div className="navbar-brand-container d-flex align-items-center">
-            <img src={logo} alt="MIRAI Logo" width="80" height="80" className="navbar-logo" />
             <a className="navbar-brand h1 text_format d-none d-lg-block" href="#" style={{ color: "#fff" }}>
-              AI-based Academic Assessment and Feedback            </a>
+              AI-based Academic Assessment
+            </a>
             <a className="navbar-brand h1 text_format d-lg-none" href="#" style={{ color: "#fff" }}>
-              MIRAI Academic
+              MIRAI
             </a>
           </div>
           
@@ -230,9 +284,10 @@ const Dashboard = () => {
 
           <div className="collapse navbar-collapse justify-content-end" id="navbarNav">
             <ul className="navbar-nav">
+              {/* Dashboard button to return to main view */}
               <li className="nav-item">
                 <Link className="nav-link px-3" to="/dashboard">
-                  <i className="bi bi-house-door"></i> Home
+                  <i className="bi bi-house-door"></i> Dashboard
                 </Link>
               </li>
               <li className="nav-item">
@@ -250,7 +305,7 @@ const Dashboard = () => {
         </div>
       </nav>
 
-      {/* Dashboard Layout */}
+      {/* Dashboard Layout - Full width, left aligned */}
       <div className="dashboard-layout">
         {/* Overlay para cerrar el sidebar en móvil */}
         <div 
@@ -258,11 +313,10 @@ const Dashboard = () => {
           onClick={closeSidebar}
         ></div>
 
-        {/* Sidebar */}
+        {/* Sidebar - Positioned like AdminDashboard */}
         <div className={`dashboard-sidebar ${showSidebar ? 'show' : ''}`}>
           <div className="sidebar-header">
-            <img src={logo} alt="Logo" className="sidebar-logo" />
-            <h3>Dashboard</h3>
+            <img src={logo} alt="MIRAI Logo" className="sidebar-logo" />
           </div>
           
           <div className="sidebar-menu">
@@ -270,8 +324,8 @@ const Dashboard = () => {
               className={`menu-item ${activeSection === 'overview' ? 'active' : ''}`}
               onClick={() => handleSectionChange('overview')}
             >
-              <i className="bi bi-grid-1x2-fill"></i>
-              Overview
+              <i className="bi bi-speedometer2"></i>
+              <span>Overview</span>
             </button>
 
             {/* Interview results button */}
@@ -281,8 +335,19 @@ const Dashboard = () => {
                 onClick={handleInterviewResults}
               >
                 <i className="bi bi-chat-dots-fill"></i>
-                Interview Results
+                <span>Interview</span>
               </button>
+            )}
+            
+            {/* Admin Dashboard button - only visible for admin users */}
+            {isAdmin && (
+              <Link 
+                to="/admin" 
+                className="menu-item"
+              >
+                <i className="bi bi-shield-lock"></i>
+                <span>Admin Panel</span>
+              </Link>
             )}
           </div>
 
@@ -292,109 +357,117 @@ const Dashboard = () => {
             onClick={handleLogout}
           >
             <i className="bi bi-box-arrow-left"></i>
-            Logout
+            <span>Logout</span>
           </button>
         </div>
 
-        {/* Main Content */}
+        {/* Main Content - Left aligned with padding */}
         <div className="dashboard-main">
-              <>
-              <div className="dashboard-header">
-                <div className="header-welcome">
-                  <h2>Welcome back, {user?.name}</h2>
-                  <p>Here's a summary of your progress</p>
-                </div>
-                <div className="progress-circle-container">
-                  <div 
-                    className="progress-circle" 
-                    style={{ "--progress": `${calculateProgress() * 3.6}deg` }}
-                  >
-                    <div className="progress-circle-content">
-                      <div className="progress-value">{Math.round(calculateProgress())}%</div>
-                      <div className="progress-text">Completed</div>
-                    </div>
+          <div className="px-3">
+            <div className="dashboard-header">
+              <div className="header-welcome">
+                <h2>Welcome back, {user?.name}</h2>
+                <p>Here's a summary of your progress</p>
+              </div>
+              <div className="progress-circle-container">
+                <div 
+                  className="progress-circle" 
+                  style={{ "--progress": `${calculateProgress() * 3.6}deg` }}
+                >
+                  <div className="progress-circle-content">
+                    <div className="progress-value">{Math.round(calculateProgress())}%</div>
+                    <div className="progress-text">Completed</div>
                   </div>
                 </div>
               </div>
+            </div>
 
-              <div className="dashboard-content">
-                <div className="content-left">
-                  {renderProfileCard()}
-                </div>
-                <div className="content-right">
-                  <div className="dashboard-stats">
-                    <div className={`stat-card ${status?.cvUploaded ? 'completed' : 'pending'}`}>
-                      <i className="bi bi-file-earmark-check icon-feature"></i>
-                      <div className="stat-info">
-                        <h4>Report Status</h4>
-                        <p>
-                          <span className={`status-dot ${status?.cvUploaded ? 'completed' : 'pending'}`}></span>
-                          {status?.cvUploaded ? 'Uploaded' : 'Pending'}
-                        </p>
-                        {!status?.cvUploaded && (
-                          <button className="btn btn-primary mt-2" onClick={() => setShowModal(true)}>
-                            <i className="bi bi-upload"></i> Upload Report
+            <div className="dashboard-content">
+              <div className="content-left">
+                {renderProfileCard()}
+              </div>
+              <div className="content-right">
+                <div className="dashboard-stats">
+                  <div className={`stat-card ${status?.cvUploaded ? 'completed' : 'pending'}`}>
+                    <i className="bi bi-file-earmark-check icon-feature"></i>
+                    <div className="stat-info">
+                      <h4>Report Status</h4>
+                      <p>
+                        <span className={`status-dot ${status?.cvUploaded ? 'completed' : 'pending'}`}></span>
+                        {status?.cvUploaded ? 'Uploaded' : 'Pending'}
+                      </p>
+                      {!status?.cvUploaded && (
+                        <button className="btn btn-primary mt-2" onClick={() => setShowModal(true)}>
+                          <i className="bi bi-upload"></i> Upload Report
+                        </button>
+                      )}
+                      {status?.cvUploaded && (
+                        <div className="cv-actions mt-2">
+                          {!status?.cvAnalyzed && (
+                            <Link to="/analyze-cv" className="btn btn-secondary">
+                              <i className="bi bi-search"></i> Analyse
+                            </Link>
+                          )}
+                          <button 
+                            className="btn btn-info me-2" 
+                            onClick={handleViewReport}
+                            title="View report"
+                          >
+                            <i className="bi bi-eye"></i> View
                           </button>
+                          <button 
+                            className="btn btn-danger" 
+                            onClick={handleDeleteReport}
+                            title="Delete report"
+                          >
+                            <i className="bi bi-trash"></i> Delete
+                          </button>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                  
+                  <div className={`stat-card ${status?.interviewCompleted ? 'completed' : 'pending'}`}>
+                    <i className="bi bi-chat-dots icon-feature"></i>
+                    <div className="stat-info">
+                      <h4>Report Interview</h4>
+                      <p>
+                        <span className={`status-dot ${status?.interviewCompleted ? 'completed' : 'pending'}`}></span>
+                        {status?.interviewCompleted ? 'Completed' : 'Pending'}
+                      </p>
+                      <div className="d-flex gap-2 mt-2">
+                        {status?.cvAnalyzed && !status?.interviewCompleted && (
+                          <Link to="/analyze-cv" className="btn btn-primary">
+                            <i className="bi bi-chat"></i> Take Interview
+                          </Link>
                         )}
-                        {status?.cvUploaded && (
-                          <div className="cv-actions mt-2">
-                            {!status?.cvAnalyzed && (
-                              <Link to="/analyze-cv" className="btn btn-secondary">
-                                <i className="bi bi-search"></i> Analyse
-                              </Link>
-                            )}
+                        {status?.interviewCompleted && (
+                          <>
+                            <Link to="/interview-results" className="btn btn-secondary">
+                              <i className="bi bi-graph-up"></i> View Results
+                            </Link>
                             <button 
                               className="btn btn-danger" 
-                              onClick={handleDeleteReport}
-                              title="Delete report"
+                              onClick={handleDeleteInterview}
+                              title="Delete interview"
                             >
                               <i className="bi bi-trash"></i> Delete
                             </button>
-                          </div>
+                          </>
+                        )}
+                        {!status?.cvAnalyzed && (
+                          <span className="text-muted d-block">Upload and analyze your report first</span>
                         )}
                       </div>
                     </div>
-                    
-                    <div className={`stat-card ${status?.interviewCompleted ? 'completed' : 'pending'}`}>
-                      <i className="bi bi-chat-dots icon-feature"></i>
-                      <div className="stat-info">
-                        <h4>Report Interview</h4>
-                        <p>
-                          <span className={`status-dot ${status?.interviewCompleted ? 'completed' : 'pending'}`}></span>
-                          {status?.interviewCompleted ? 'Completed' : 'Pending'}
-                        </p>
-                        <div className="d-flex gap-2 mt-2">
-                          {status?.cvAnalyzed && !status?.interviewCompleted && (
-                            <Link to="/analyse-cv" className="btn btn-primary">
-                              <i className="bi bi-chat"></i> Take Interview
-                            </Link>
-                          )}
-                          {status?.interviewCompleted && (
-                            <>
-                              <Link to="/interview-results" className="btn btn-secondary">
-                                <i className="bi bi-graph-up"></i> View Results
-                              </Link>
-                              <button 
-                                className="btn btn-danger" 
-                                onClick={handleDeleteInterview}
-                                title="Delete interview"
-                              >
-                                <i className="bi bi-trash"></i> Delete
-                              </button>
-                            </>
-                          )}
-                          {!status?.cvAnalyzed && (
-                            <span className="text-muted d-block">Upload and analyze your report first</span>
-                          )}
-                        </div>
-                      </div>
-                    </div>  
-                  </div>
+                  </div>  
                 </div>
               </div>
-            </>
+            </div>
+          </div>
         </div>
       </div>
+      
       {/* Modal */}
       {showModal && (
         <div className="modal-overlay">
