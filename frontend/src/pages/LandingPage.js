@@ -25,7 +25,7 @@ const LandingPage = () => {
         <div className="container">
           <div className="navbar-brand-container d-flex align-items-center">
             <img src={logo} alt="MIRAI Logo" width="80" height="80" className="navbar-logo" />
-            <a className="navbar-brand h1 text_format d-none d-lg-block" href="#" style={{ color: "#fff", fontSize: "1.5rem" }}>
+            <a className="navbar-brand h1 text_format d-none d-lg-block" href="#" style={{ color: "#fff", fontSize: "1.2rem" }}>
             AI-based Academic Assessment and Feedback
             </a>
             <a className="navbar-brand h1 text_format d-lg-none" href="#" style={{ color: "#fff", fontSize: "2rem" }}>
