@@ -9,6 +9,18 @@ const Navbar = () => (
   <nav className="navbar navbar-expand-lg navbar-dark bg-gray py-2 fixed-top">
     <div className="container">
       <div className="navbar-brand-container d-flex align-items-center">
+        <button 
+          className="btn btn-link d-lg-none me-2" 
+          onClick={() => {
+            if (window.confirm('Are you sure you want to return to dashboard? Your answers will be lost.')) {
+              window.location.href = '/dashboard';
+            }
+          }}
+          style={{ color: 'white', textDecoration: 'none' }}
+        >
+          <i className="bi bi-arrow-left-circle fs-4"></i>
+        </button>
+        
         <img src={logo} alt="Logo MIRAI" width="80" height="80" className="navbar-logo" />
         <a className="navbar-brand h1 text_format d-none d-lg-block" href="#" style={{ color: "#fff" }}>
           Intelligent Academic Management and Evaluation System

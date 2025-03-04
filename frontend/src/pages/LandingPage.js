@@ -25,10 +25,10 @@ const LandingPage = () => {
         <div className="container">
           <div className="navbar-brand-container d-flex align-items-center">
             <img src={logo} alt="MIRAI Logo" width="80" height="80" className="navbar-logo" />
-            <a className="navbar-brand h1 text_format d-none d-lg-block" href="#" style={{ color: "#fff" }}>
-              Intelligent Academic Management and Evaluation System
+            <a className="navbar-brand h1 text_format d-none d-lg-block" href="#" style={{ color: "#fff", fontSize: "1.5rem" }}>
+            AI-based Academic Assessment and Feedback
             </a>
-            <a className="navbar-brand h1 text_format d-lg-none" href="#" style={{ color: "#fff" }}>
+            <a className="navbar-brand h1 text_format d-lg-none" href="#" style={{ color: "#fff", fontSize: "2rem" }}>
               MIRAI Academic
             </a>
           </div>
@@ -61,10 +61,9 @@ const LandingPage = () => {
       {/* Hero Section */}
       <header className="hero-section" style={{ backgroundImage: `url(${background})` }}>
         <div className="container text-center text-white purpose-box">
-          <h1 className="display-4">Intelligent Academic Report Management</h1>
+          <h1 className="display-1" style={{ fontSize: "3.5rem", fontWeight: "bold" }}>MIRAI Academic</h1>
           <p className="lead">
-            Optimize the evaluation and monitoring of reports and assignments in higher education 
-            with our AI-powered platform.
+            AI-based automation of continuous assessment and feedback in Higher Education
           </p>
         </div>
       </header>

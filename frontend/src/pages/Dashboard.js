@@ -213,8 +213,7 @@ const Dashboard = () => {
           <div className="navbar-brand-container d-flex align-items-center">
             <img src={logo} alt="MIRAI Logo" width="80" height="80" className="navbar-logo" />
             <a className="navbar-brand h1 text_format d-none d-lg-block" href="#" style={{ color: "#fff" }}>
-              MIRAI Intelligent Academic Management System
-            </a>
+              AI-based Academic Assessment and Feedback            </a>
             <a className="navbar-brand h1 text_format d-lg-none" href="#" style={{ color: "#fff" }}>
               MIRAI Academic
             </a>
@@ -263,7 +262,7 @@ const Dashboard = () => {
         <div className={`dashboard-sidebar ${showSidebar ? 'show' : ''}`}>
           <div className="sidebar-header">
             <img src={logo} alt="Logo" className="sidebar-logo" />
-            <h3>Control Panel</h3>
+            <h3>Dashboard</h3>
           </div>
           
           <div className="sidebar-menu">
@@ -275,7 +274,7 @@ const Dashboard = () => {
               Overview
             </button>
 
-            {/* Nuevo botón para resultados de entrevista */}
+            {/* Interview results button */}
             {status?.interviewCompleted && (
               <button 
                 className={`menu-item ${activeSection === 'interview-results' ? 'active' : ''}`}
@@ -287,7 +286,7 @@ const Dashboard = () => {
             )}
           </div>
 
-          {/* Botón de cerrar sesión */}
+          {/* Logout button */}
           <button 
             className="sidebar-logout"
             onClick={handleLogout}
@@ -312,7 +311,7 @@ const Dashboard = () => {
                   >
                     <div className="progress-circle-content">
                       <div className="progress-value">{Math.round(calculateProgress())}%</div>
-                      <div className="progress-text">Completado</div>
+                      <div className="progress-text">Completed</div>
                     </div>
                   </div>
                 </div>
@@ -341,7 +340,7 @@ const Dashboard = () => {
                           <div className="cv-actions mt-2">
                             {!status?.cvAnalyzed && (
                               <Link to="/analyze-cv" className="btn btn-secondary">
-                                <i className="bi bi-search"></i> Analyze
+                                <i className="bi bi-search"></i> Analyse
                               </Link>
                             )}
                             <button 
@@ -366,7 +365,7 @@ const Dashboard = () => {
                         </p>
                         <div className="d-flex gap-2 mt-2">
                           {status?.cvAnalyzed && !status?.interviewCompleted && (
-                            <Link to="/analyze-cv" className="btn btn-primary">
+                            <Link to="/analyse-cv" className="btn btn-primary">
                               <i className="bi bi-chat"></i> Take Interview
                             </Link>
                           )}

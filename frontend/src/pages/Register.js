@@ -13,15 +13,10 @@ const Register = () => {
     password: "",
     confirmPassword: "",
     phone: "",
-    dob: "",
-    nationality: "",
-    gender: "",
     institution: "",
     title: "",
-    academic_level: "",
-    research_area: "",
-    student_id: "",
-    semester: "",
+    module: "",
+    programme_code: "",
     program: ""
   });
 
@@ -206,38 +201,6 @@ const Register = () => {
                 required
               />
             </div>
-            <div className="mb-3">
-              <input
-                type="date"
-                name="dob"
-                className="form-control"
-                onChange={handleChange}
-                required
-              />
-            </div>
-            <div className="mb-3">
-              <input
-                type="text"
-                name="nationality"
-                className="form-control"
-                placeholder="Nationality"
-                onChange={handleChange}
-                required
-              />
-            </div>
-            <div className="mb-3">
-              <select
-                name="gender"
-                className="form-control"
-                onChange={handleChange}
-                required
-              >
-                <option value="">Select your gender</option>
-                <option value="Male">Male</option>
-                <option value="Female">Female</option>
-                <option value="Other">Other</option>
-              </select>
-            </div>
 
             {/* Academic Information */}
             <h4 className="section-title">Academic Information</h4>
@@ -264,32 +227,9 @@ const Register = () => {
             <div className="mb-3">
               <input
                 type="text"
-                name="research_area"
+                name="module"
                 className="form-control"
-                placeholder="Research Area"
-                onChange={handleChange}
-                required
-              />
-            </div>
-            <div className="mb-3">
-              <select
-                name="academic_level"
-                className="form-select"
-                onChange={handleChange}
-                required
-              >
-                <option value="">Select academic level</option>
-                <option value="Secondary">Secondary</option>
-                <option value="High School">High School</option>
-                <option value="University">University</option>
-              </select>
-            </div>
-            <div className="mb-3">
-              <input
-                type="text"
-                name="student_id"
-                className="form-control"
-                placeholder="Student ID"
+                placeholder="Module"
                 onChange={handleChange}
                 required
               />
@@ -297,9 +237,9 @@ const Register = () => {
             <div className="mb-3">
               <input
                 type="text"
-                name="semester"
+                name="programme_code"
                 className="form-control"
-                placeholder="Semester"
+                placeholder="Programme Code"
                 onChange={handleChange}
                 required
               />
