@@ -71,11 +71,11 @@ const AdminInterviewView = () => {
         <div className="sidebar-menu">
           <Link to="/admin" className="menu-item">
             <i className="bi bi-speedometer2"></i>
-            <span>Dashboard</span>
+            <span>Admin Dashboard</span>
           </Link>
           <Link to="/dashboard" className="menu-item">
             <i className="bi bi-house-door"></i>
-            <span>Main Dashboard</span>
+            <span>User Dashboard</span>
           </Link>
           <div className="menu-item" onClick={handleLogout}>
             <i className="bi bi-box-arrow-right"></i>
@@ -146,14 +146,14 @@ const AdminInterviewView = () => {
                   </div>
                   {user?.cvPath && (
                     <div className="stat-item">
-                      <span className="stat-label">CV</span>
+                      <span className="stat-label">Report File</span>
                       <a 
                         href={user.cvPath} 
                         target="_blank" 
                         rel="noopener noreferrer" 
                         className="btn btn-sm btn-info"
                       >
-                        <i className="bi bi-file-pdf"></i> View CV
+                        <i className="bi bi-file-pdf"></i> View Report
                       </a>
                     </div>
                   )}

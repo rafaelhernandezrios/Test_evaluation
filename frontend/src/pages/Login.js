@@ -50,7 +50,7 @@ const Login = () => {
           <div className="navbar-brand-container d-flex align-items-center">
             <img src={logo} alt="MIRAI Logo" width="80" height="80" className="navbar-logo" />
             <a className="navbar-brand h1 text_format d-none d-lg-block" href="#" style={{ color: "#fff" }}>
-              MIRAI Intelligent Platform
+              MIRAI Academic
             </a>
             <a className="navbar-brand h1 text_format d-lg-none" href="#" style={{ color: "#fff" }}>
               MIRAI

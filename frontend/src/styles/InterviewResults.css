@@ -319,14 +319,14 @@
 /* Botón de regreso al dashboard */
 .return-dashboard {
   margin-top: auto !important;
-  background-color: rgba(13, 83, 91, 0.1) !important;
-  color: #0d535b !important;
+  background-color: rgba(248, 241, 241, 0.1) !important;
+  color: #e5eff0 !important;
   border-radius: 8px;
   transition: all 0.3s ease;
 }
 
 .return-dashboard:hover {
-  background-color: #0d535b !important;
+  background-color: #f4fbfb !important;
   color: white !important;
   transform: translateX(-5px);
 }

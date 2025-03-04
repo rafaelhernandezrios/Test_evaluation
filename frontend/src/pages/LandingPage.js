@@ -26,7 +26,7 @@ const LandingPage = () => {
           <div className="navbar-brand-container d-flex align-items-center">
             <img src={logo} alt="MIRAI Logo" width="80" height="80" className="navbar-logo" />
             <a className="navbar-brand h1 text_format d-none d-lg-block" href="#" style={{ color: "#fff", fontSize: "1.2rem" }}>
-            AI-based Academic Assessment and Feedback
+              MIRAI Academic
             </a>
             <a className="navbar-brand h1 text_format d-lg-none" href="#" style={{ color: "#fff", fontSize: "2rem" }}>
               MIRAI Academic
@@ -63,19 +63,19 @@ const LandingPage = () => {
         <div className="container text-center text-white purpose-box">
           <h1 className="display-1" style={{ fontSize: "3.5rem", fontWeight: "bold" }}>MIRAI Academic</h1>
           <p className="lead">
-            AI-based automation of continuous assessment and feedback in Higher Education
-          </p>
+
+          AI-based Academic Assessment and Feedback          </p>
         </div>
       </header>
 
       {/* Features Section */}
       <section className="container my-5">
         <h4 className="text-center mb-4">Main Features</h4>
-        <div className="row text-center">
+        <div className="row text-center justify-content-center">
           <div className="col-md-6 col-lg-3 mb-4">
             <i className="bi bi-file-earmark-text icon-feature"></i>
             <h4>Report Management</h4>
-            <p>Upload and manage academic reports with ease. Intelligent organization and tracking system.</p>
+            <p>Upload and manage academic reports with ease.</p>
           </div>
           <div className="col-md-6 col-lg-3 mb-4">
             <i className="bi bi-graph-up icon-feature"></i>
@@ -85,12 +85,7 @@ const LandingPage = () => {
           <div className="col-md-6 col-lg-3 mb-4">
             <i className="bi bi-chat-dots icon-feature"></i>
             <h4>Feedback</h4>
-            <p>Detailed feedback system to improve academic performance.</p>
-          </div>
-          <div className="col-md-6 col-lg-3 mb-4">
-            <i className="bi bi-clipboard-data icon-feature"></i>
-            <h4>Academic Tracking</h4>
-            <p>Monitor progress and analyze trends in student performance.</p>
+            <p>Detailed feedback to improve academic performance.</p>
           </div>
         </div>
       </section>

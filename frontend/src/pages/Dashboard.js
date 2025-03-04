@@ -109,6 +109,7 @@ const Dashboard = () => {
   };
 
   const handleInterviewResults = () => {
+    setActiveSection('overview');
     if (status?.interviewCompleted) {
       navigate('/interview-results');
     }
@@ -266,7 +267,7 @@ const Dashboard = () => {
         <div className="container-fluid px-3">
           <div className="navbar-brand-container d-flex align-items-center">
             <a className="navbar-brand h1 text_format d-none d-lg-block" href="#" style={{ color: "#fff" }}>
-              AI-based Academic Assessment
+              MIRAI Academic
             </a>
             <a className="navbar-brand h1 text_format d-lg-none" href="#" style={{ color: "#fff" }}>
               MIRAI
@@ -290,11 +291,7 @@ const Dashboard = () => {
                   <i className="bi bi-house-door"></i> Dashboard
                 </Link>
               </li>
-              <li className="nav-item">
-                <Link className="nav-link px-3" to="/profile">
-                  <i className="bi bi-person"></i> Profile
-                </Link>
-              </li>
+              
               <li className="nav-item">
                 <button className="nav-link px-3" onClick={handleLogout}>
                   <i className="bi bi-box-arrow-right"></i> Logout
@@ -411,9 +408,9 @@ const Dashboard = () => {
                           <button 
                             className="btn btn-info me-2" 
                             onClick={handleViewReport}
-                            title="View report"
+                            title="Download Report"
                           >
-                            <i className="bi bi-eye"></i> View
+                            <i className="bi bi-eye"></i> Download
                           </button>
                           <button 
                             className="btn btn-danger" 

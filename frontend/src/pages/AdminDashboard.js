@@ -80,11 +80,11 @@ const AdminDashboard = () => {
         <div className="sidebar-menu">
           <div className="menu-item active">
             <i className="bi bi-speedometer2"></i>
-            <span>Dashboard</span>
+            <span>Admin Dashboard</span>
           </div>
           <Link to="/dashboard" className="menu-item">
             <i className="bi bi-house-door"></i>
-            <span>Main Dashboard</span>
+            <span>User Dashboard</span>
           </Link>
           <div className="menu-item" onClick={handleLogout}>
             <i className="bi bi-box-arrow-right"></i>
@@ -170,7 +170,7 @@ const AdminDashboard = () => {
                   </div>
                   <div className="stat-card-info">
                     <h3>{analyzedCVs}</h3>
-                    <p>Analyzed CVs</p>
+                    <p>Analysed Reports</p>
                   </div>
                 </div>
                 
@@ -232,13 +232,14 @@ const AdminDashboard = () => {
                         <th>Institution</th>
                         <th>Report Status</th>
                         <th>Interview Score</th>
-                        <th>Actions</th>
+                        <th>Report File</th>
+                        <th>Analysis Overview</th>
                       </tr>
                     </thead>
                     <tbody>
                       {filteredUsers.length === 0 ? (
                         <tr>
-                          <td colSpan="5" className="text-center py-4">
+                          <td colSpan="6" className="text-center py-4">
                             No users found matching your criteria
                           </td>
                         </tr>
@@ -278,28 +279,28 @@ const AdminDashboard = () => {
                               )}
                             </td>
                             <td>
-                              <div className="action-buttons">
-                                {user.cvPath && (
-                                  <a 
-                                    href={user.cvPath} 
-                                    target="_blank" 
-                                    rel="noopener noreferrer" 
-                                    className="btn btn-sm btn-info"
-                                    title="View CV"
-                                  >
-                                    <i className="bi bi-file-pdf"></i>
-                                  </a>
-                                )}
-                                {user.interviewCompleted && (
-                                  <Link 
-                                    to={`/admin/interview/${user._id}`} 
-                                    className="btn btn-sm btn-primary"
-                                    title="View Interview Analysis"
-                                  >
-                                    <i className="bi bi-chat-dots"></i>
-                                  </Link>
-                                )}
-                              </div>
+                              {user.cvPath && (
+                                <a 
+                                  href={user.cvPath} 
+                                  target="_blank" 
+                                  rel="noopener noreferrer" 
+                                  className="btn btn-sm btn-info"
+                                  title="View Report"
+                                >
+                                  <i className="bi bi-file-pdf"></i>
+                                </a>
+                              )}
+                            </td>
+                            <td>
+                              {user.interviewCompleted && (
+                                <Link 
+                                  to={`/admin/interview/${user._id}`} 
+                                  className="btn btn-sm btn-primary"
+                                  title="View Analysis Overview"
+                                >
+                                  <i className="bi bi-chat-dots"></i>
+                                </Link>
+                              )}
                             </td>
                           </tr>
                         ))

@@ -11,7 +11,7 @@ const InterviewResults = () => {
   const [interviewData, setInterviewData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
-  const [activeSection, setActiveSection] = useState('questions');
+  const [activeSection, setActiveSection] = useState('overview');
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -187,18 +187,9 @@ const InterviewResults = () => {
       <nav className="navbar navbar-expand-lg navbar-dark bg-gray py-3 fixed-top">
         <div className="container-fluid">
           <div className="d-flex align-items-center" style={{ maxWidth: '80%' }}>
-            <img 
-              src={logo} 
-              alt="MIRAI Logo" 
-              style={{ 
-                height: '60px',
-                width: 'auto',
-                maxWidth: '100%',
-                marginRight: '1rem'
-              }} 
-            />
+            
             <Link className="navbar-brand h1 text_format" to="/dashboard" style={{ color: "#fff" }}>
-              AI-based Academic Assessment
+              MIRAI Academic
             </Link>
           </div>
           
@@ -218,16 +209,8 @@ const InterviewResults = () => {
                   <i className="bi bi-house-door"></i> Dashboard
                 </Link>
               </li>
-              <li className="nav-item">
-                <Link className="nav-link" to="/profile">
-                  <i className="bi bi-person-circle"></i> Profile
-                </Link>
-              </li>
-              <li className="nav-item">
-                <Link className="nav-link" to="/resources">
-                  <i className="bi bi-book"></i> Resources
-                </Link>
-              </li>
+            
+              
               <li className="nav-item">
                 <button onClick={handleLogout} className="nav-link btn btn-link">
                   <i className="bi bi-box-arrow-right"></i> Logout
@@ -244,7 +227,7 @@ const InterviewResults = () => {
         <div className="dashboard-sidebar">
           <div className="sidebar-header">
             <img src={logo} alt="Logo" className="sidebar-logo" />
-            <h3>Results</h3>
+   
           </div>
           
           <div className="sidebar-menu">
